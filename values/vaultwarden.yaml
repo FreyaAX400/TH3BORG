@@ -24,3 +24,13 @@ resources:
   limits:
     memory: 256Mi
     cpu: 200m
+
+livenessProbe:
+  httpGet:
+    path: /vaultwarden/alive
+    port: 8080
+
+readinessProbe:
+  httpGet:
+    path: /vaultwarden/alive
+    port: 8080
