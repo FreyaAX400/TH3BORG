@@ -15,13 +15,7 @@ storage:
     accessMode: ReadWriteOnce
 
 ingress:
-  enabled: true
-  ingressClassName: traefik
-  hostname: vaultwarden.borgling-1.tail20def8.ts.net
-  tlsSecret: ""
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.tls: "true"
+  enabled: false
 
 resources:
   requests:
