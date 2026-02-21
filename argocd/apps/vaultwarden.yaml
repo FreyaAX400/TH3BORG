@@ -8,14 +8,14 @@ spec:
   source:
     repoURL: https://guerzon.github.io/vaultwarden
     chart: vaultwarden
-    targetRevision: "0.28.4"
+    targetRevision: "0.34.6"
     helm:
       valueFiles:
         - $values/values/vaultwarden.yaml
   sources:
     - repoURL: https://guerzon.github.io/vaultwarden
       chart: vaultwarden
-      targetRevision: "0.28.4"
+      targetRevision: "0.34.6"
       helm:
         valueFiles:
           - $values/values/vaultwarden.yaml
