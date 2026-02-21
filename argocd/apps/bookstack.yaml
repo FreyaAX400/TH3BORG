@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bookstack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/JohanLarsson-Hall/TH3BORG.git
+    targetRevision: HEAD
+    path: apps/bookstack
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: bookstack
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
