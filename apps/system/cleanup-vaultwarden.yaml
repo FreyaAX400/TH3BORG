@@ -1,3 +1,36 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cleanup-sa
+  namespace: vaultwarden
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cleanup-role
+  namespace: vaultwarden
+rules:
+- apiGroups: ["apps"]
+  resources: ["statefulsets"]
+  verbs: ["delete"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: cleanup-rolebinding
+  namespace: vaultwarden
+subjects:
+- kind: ServiceAccount
+  name: cleanup-sa
+  namespace: vaultwarden
+roleRef:
+  kind: Role
+  name: cleanup-role
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -6,7 +39,7 @@ metadata:
 spec:
   template:
     spec:
-      serviceAccountName: default
+      serviceAccountName: cleanup-sa
       containers:
       - name: cleanup
         image: bitnami/kubectl:latest
