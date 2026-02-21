@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: enable-tailscale-ssh
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      hostPID: true
+      tolerations:
+      - key: node-role.kubernetes.io/control-plane
+        effect: NoSchedule
+      nodeSelector:
+        kubernetes.io/hostname: borgling-1
+      containers:
+      - name: enable-ssh
+        image: alpine:3.19
+        securityContext:
+          privileged: true
+        command:
+        - nsenter
+        - -t
+        - "1"
+        - -m
+        - -u
+        - -i
+        - -n
+        - --
+        - tailscale
+        - up
+        - --ssh
+      restartPolicy: Never
+      hostNetwork: true
