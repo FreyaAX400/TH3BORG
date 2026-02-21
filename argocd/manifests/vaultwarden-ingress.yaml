@@ -6,13 +6,14 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: vaultwarden-stripprefix@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
-  - host: vaultwarden.borgling-1.tail20def8.ts.net
+  - host: borgling-1.tail20def8.ts.net
     http:
       paths:
-      - path: /
+      - path: /vaultwarden
         pathType: Prefix
         backend:
           service:
