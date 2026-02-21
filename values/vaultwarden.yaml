@@ -1,7 +1,7 @@
 image:
   tag: "1.32.0"
 
-domain: "https://vaultwarden.borgling-1.tail20def8.ts.net"
+domain: "https://borgling-1.tail20def8.ts.net/vaultwarden"
 
 adminToken:
   existingSecret: "vaultwarden-admin-token"
