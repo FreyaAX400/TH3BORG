@@ -5,20 +5,19 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  sources:
-    - repoURL: https://guerzon.github.io/vaultwarden
-      chart: vaultwarden
-      targetRevision: "0.34.6"
-      helm:
-        valueFiles:
-          - $values/values/vaultwarden.yaml
-    - repoURL: https://github.com/JohanLarsson-Hall/TH3BORG.git
-      targetRevision: HEAD
-      ref: values
-    - repoURL: https://github.com/JohanLarsson-Hall/TH3BORG.git
-      targetRevision: HEAD
-      path: argocd/manifests
+  source:
+    repoURL: https://github.com/JohanLarsson-Hall/TH3BORG.git
+    targetRevision: HEAD
+    path: apps/vaultwarden
   destination:
+    server: https://kubernetes.default.svc
+    namespace: vaultwarden
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
     server: https://kubernetes.default.svc
     namespace: vaultwarden
   syncPolicy:
