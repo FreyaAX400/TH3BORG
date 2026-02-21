@@ -1,0 +1,32 @@
+image:
+  tag: "1.32.0"
+
+domain: "https://vaultwarden.borgling-1.tail20def8.ts.net"
+
+adminToken:
+  existingSecret: "vaultwarden-admin-token"
+  existingSecretKey: "token"
+
+storage:
+  data:
+    name: vaultwarden-data
+    size: 5Gi
+    storageClass: local-path
+    accessMode: ReadWriteOnce
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hostname: vaultwarden.borgling-1.tail20def8.ts.net
+  tlsSecret: ""
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+
+resources:
+  requests:
+    memory: 64Mi
+    cpu: 50m
+  limits:
+    memory: 256Mi
+    cpu: 200m
