@@ -5,14 +5,7 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: https://guerzon.github.io/vaultwarden
-    chart: vaultwarden
-    targetRevision: "0.34.6"
-    helm:
-      valueFiles:
-        - $values/values/vaultwarden.yaml
- sources:
+  sources:
     - repoURL: https://guerzon.github.io/vaultwarden
       chart: vaultwarden
       targetRevision: "0.34.6"
