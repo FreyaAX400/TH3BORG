@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cleanup-vaultwarden
+  namespace: vaultwarden
+spec:
+  template:
+    spec:
+      serviceAccountName: default
+      containers:
+      - name: cleanup
+        image: bitnami/kubectl:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          kubectl delete statefulset vaultwarden -n vaultwarden --ignore-not-found
+          kubectl delete pvc vaultwarden-data-vaultwarden-0 -n vaultwarden --ignore-not-found
+      restartPolicy: Never
