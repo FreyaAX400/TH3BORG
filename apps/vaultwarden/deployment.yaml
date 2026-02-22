@@ -58,3 +58,16 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: vaultwarden-data
+      livenessProbe:
+  tcpSocket:
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  failureThreshold: 10
+readinessProbe:
+  tcpSocket:
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  failureThreshold: 3
+  
