@@ -20,7 +20,7 @@ spec:
         - containerPort: 80
         env:
         - name: DOMAIN
-          value: "https://borgling-1.tail20def8.ts.net/vaultwarden"
+          value: "https://borgling-1.tail20def8.ts.net:8443"
         - name: ADMIN_TOKEN
           valueFrom:
             secretKeyRef:
