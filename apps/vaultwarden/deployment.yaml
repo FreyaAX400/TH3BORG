@@ -30,20 +30,6 @@ spec:
           value: "true"
         - name: ROCKET_PORT
           value: "80"
-        livenessProbe:
-          httpGet:
-            path: /api/alive
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 10
-          failureThreshold: 10
-        readinessProbe:
-          httpGet:
-            path: /api/alive
-            port: 80
-          initialDelaySeconds: 5
-          periodSeconds: 10
-          failureThreshold: 3
         resources:
           requests:
             memory: 64Mi
@@ -58,16 +44,4 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: vaultwarden-data
-      livenessProbe:
-  tcpSocket:
-    port: 80
-  initialDelaySeconds: 5
-  periodSeconds: 10
-  failureThreshold: 10
-readinessProbe:
-  tcpSocket:
-    port: 80
-  initialDelaySeconds: 5
-  periodSeconds: 10
-  failureThreshold: 3
   
