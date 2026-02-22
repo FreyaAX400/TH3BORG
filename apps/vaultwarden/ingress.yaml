@@ -3,15 +3,17 @@ kind: Ingress
 metadata:
   name: vaultwarden
   namespace: vaultwarden
-annotations:
-  traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: vaultwarden-vaultwarden-stripprefix@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
   - host: borgling-1.tail20def8.ts.net
     http:
       paths:
-      - path: /
+      - path: /vaultwarden
         pathType: Prefix
         backend:
           service:
