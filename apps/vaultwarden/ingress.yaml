@@ -3,17 +3,17 @@ kind: Ingress
 metadata:
   name: vaultwarden
   namespace: vaultwarden
-annotations:
-  traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-  traefik.ingress.kubernetes.io/router.tls: "true"
-  traefik.ingress.kubernetes.io/router.middlewares: vaultwarden-vaultwarden-stripprefix@kubernetescrd
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "1024m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
 spec:
-  ingressClassName: traefik
+  ingressClassName: nginx
   rules:
   - host: borgling-1.tail20def8.ts.net
     http:
       paths:
-      - path: /vaultwarden
+      - path: /
         pathType: Prefix
         backend:
           service:
