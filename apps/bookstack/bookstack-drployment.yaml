@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookstack
+  namespace: bookstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookstack
+  template:
+    metadata:
+      labels:
+        app: bookstack
+    spec:
+      containers:
+      - name: bookstack
+        image: lscr.io/linuxserver/bookstack:latest
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: APP_URL
+          value: "https://borgling-1.tail20def8.ts.net:9443"
+        - name: DB_HOST
+          value: "bookstack-mysql"
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USER
+          value: "bookstack"
+        - name: DB_PASS
+          value: "bookstack"
+        - name: DB_DATABASE
+          value: "bookstack"
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 100m
+          limits:
+            memory: 512Mi
+            cpu: 500m
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: data
+          mountPath: /config
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: bookstack-data
