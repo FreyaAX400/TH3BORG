@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookstack-mysql
+  namespace: bookstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookstack-mysql
+  template:
+    metadata:
+      labels:
+        app: bookstack-mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "bookstack"
+        - name: MYSQL_DATABASE
+          value: "bookstack"
+        - name: MYSQL_USER
+          value: "bookstack"
+        - name: MYSQL_PASSWORD
+          value: "bookstack"
+        ports:
+        - containerPort: 3306
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 100m
+          limits:
+            memory: 512Mi
+            cpu: 500m
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: bookstack-mysql-data
