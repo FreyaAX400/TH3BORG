@@ -29,9 +29,9 @@ spec:
           value: "bookstack-mysql"
         - name: DB_PORT
           value: "3306"
-        - name: DB_USER
+        - name: DB_USERNAME
           value: "bookstack"
-        - name: DB_PASS
+        - name: DB_PASSWORD
           value: "bookstack"
         - name: DB_DATABASE
           value: "bookstack"
