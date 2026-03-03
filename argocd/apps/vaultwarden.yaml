@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/JohanLarsson-Hall/TH3BORG.git
+    repoURL: https://github.com/FreyaAX400/TH3BORG.git
     targetRevision: HEAD
     path: apps/vaultwarden
   destination:
