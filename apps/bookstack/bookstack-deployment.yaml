@@ -23,6 +23,8 @@ spec:
           value: "1000"
         - name: APP_URL
           value: "https://borgling-1.tail20def8.ts.net:8443/bookstack"
+        - name: APP_KEY
+          value: "base64:aUZrdxJYjbY18R7CDa6bq+w5M+sA2CSazPSHiO3+aRk="
         - name: DB_HOST
           value: "bookstack-mysql"
         - name: DB_PORT
