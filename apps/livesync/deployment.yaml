@@ -20,7 +20,7 @@ spec:
         - name: COUCHDB_USER
           value: "admin"
         - name: COUCHDB_PASSWORD
-          value: "changeme"
+          value: "lx19KTYuHPPX775z7mvpLABaV5kr79pZnul+RAiDW9P3KNEAJB1trS8v"
         - name: ERL_FLAGS
           value: "-setcookie monster"
         ports:
