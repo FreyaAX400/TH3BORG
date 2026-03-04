@@ -14,64 +14,80 @@ spec:
         app: livesync
     spec:
       containers:
-      - name: livesync
-        image: couchdb:3.3
-        env:
+      - env:
         - name: COUCHDB_USER
-          value: "admin"
+          value: admin
         - name: COUCHDB_PASSWORD
-          value: "lx19KTYuHPPX775z7mvpLABaV5kr79pZnul+RAiDW9P3KNEAJB1trS8v"
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: livesync-couchdb-secret
         - name: ERL_FLAGS
-          value: "-setcookie monster"
-        ports:
-        - containerPort: 5984
+          value: -setcookie monster
+        image: couchdb:3.3
         livenessProbe:
+          failureThreshold: 5
           httpGet:
             path: /
             port: 5984
           initialDelaySeconds: 30
           periodSeconds: 10
-          failureThreshold: 5
+        name: livesync
+        ports:
+        - containerPort: 5984
         resources:
-          requests:
-            memory: 128Mi
-            cpu: 50m
           limits:
-            memory: 256Mi
             cpu: 200m
+            memory: 256Mi
+          requests:
+            cpu: 50m
+            memory: 128Mi
         volumeMounts:
-        - name: data
-          mountPath: /opt/couchdb/data
-        - name: config
-          mountPath: /opt/couchdb/etc/local.d
+        - mountPath: /opt/couchdb/data
+          name: data
+        - mountPath: /opt/couchdb/etc/local.d
+          name: config
       initContainers:
-      - name: init-couchdb
-        image: busybox
-        command:
+      - command:
         - sh
         - -c
-        - |
-          cat > /config/local.ini << 'INI'
+        - 'cat > /config/local.ini << ''INI''
+
           [chttpd]
+
           bind_address = 0.0.0.0
+
           port = 5984
 
+
           [httpd]
+
           enable_cors = true
 
+
           [cors]
+
           origins = app://obsidian.md,capacitor://localhost,http://localhost
+
           credentials = true
+
           headers = accept, authorization, content-type, origin, referer
+
           methods = GET, PUT, POST, HEAD, DELETE
+
           max_age = 3600
+
           INI
+
+          '
+        image: busybox
+        name: init-couchdb
         volumeMounts:
-        - name: config
-          mountPath: /config
+        - mountPath: /config
+          name: config
       volumes:
       - name: data
         persistentVolumeClaim:
           claimName: livesync-data
-      - name: config
-        emptyDir: {}
+      - emptyDir: {}
+        name: config

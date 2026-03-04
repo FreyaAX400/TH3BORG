@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: bookstack-app-key
+  namespace: bookstack
+spec:
+  encryptedData:
+    key: AgA2M7Ncaqfw1GzNdhmVZFlfeu/CShsQf4/YQ7gJUiCsPu4hLxO6RJXS3p0QSfdeB/J4w/yHEmqq2NWibQ9d/ed/8KHApXxbvou0cpVd3ICoAA4im+ZDjh7CW8QhcdTKAMTvTTRlDiVfqidDdWqkyQna9y7sLL7mbmAGVNEZ9j8pvtuS3gS9gI23/7Fr6806LrJs92e8j27RtUFWdbShNPXWoU251n0qCB0Tm9Umu24HXa7ui1YL3r4TLago9SxEktVRGaZzQtGQJxsDFmLy7aFOC/rXm/VO8gPw3HwiLpJl3l0hsMsOdYQ9700PEvKeOVrOVVFTZFBmORdeb7wdR0ijGxOA484cKeprgxjjIFHhyEZkNparqcx7vG3Br7/CR+ImnMKNeGb1FwN5h8hstwS3iKyYmv9VvgQcUYQZOut5Y+sbMEQyeZGGiLfUPbuib2UcisnJtI2IQDcXIZwzZ8FhXslx3piZ2SVgQuyY5FVQ2d4mdeXwUkWrr/2r0CFv0SYnUG96il+nYR5Q8ZFb+1/k2OVhLYgf/dRbQrUmiO2eGbOwW10MvyUSUH70vDPoXXaxrFBNxLPHb/DxEtTRX7KomTyR/Ln9N6HjArxGXeV/dtAwi26psgpFINhlnVkkRfTlVXOF+2/OXts4Hr27nFyCfCaHWk/MDo5ibl8OdJALuzKy+oxp9UR0q1l4UYBHRgbB9VpBbx8T8SL9481ZUgwlTg6b5e8Beu0a9b0LnjTTMEuW+8nN38bUYBBvsTJnu9z5znY=
+  template:
+    metadata:
+      name: bookstack-app-key
+      namespace: bookstack

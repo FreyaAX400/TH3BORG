@@ -14,39 +14,45 @@ spec:
         app: bookstack
     spec:
       containers:
-      - name: bookstack
-        image: lscr.io/linuxserver/bookstack:latest
-        env:
+      - env:
         - name: PUID
-          value: "1000"
+          value: '1000'
         - name: PGID
-          value: "1000"
+          value: '1000'
         - name: APP_URL
-          value: "https://borgling-1.tail20def8.ts.net:8443/bookstack"
+          value: https://borgling-1.tail20def8.ts.net:8443/bookstack
         - name: APP_KEY
-          value: "base64:aUZrdxJYjbY18R7CDa6bq+w5M+sA2CSazPSHiO3+aRk="
+          valueFrom:
+            secretKeyRef:
+              key: key
+              name: bookstack-app-key
         - name: DB_HOST
-          value: "bookstack-mysql"
+          value: bookstack-mysql
         - name: DB_PORT
-          value: "3306"
+          value: '3306'
         - name: DB_USERNAME
-          value: "bookstack"
+          value: bookstack
         - name: DB_PASSWORD
-          value: "bookstack"
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: bookstack-db-secret
         - name: DB_DATABASE
-          value: "bookstack"
-        resources:
-          requests:
-            memory: 256Mi
-            cpu: 100m
-          limits:
-            memory: 512Mi
-            cpu: 500m
+          value: bookstack
+        image: lscr.io/linuxserver/bookstack:latest
+        name: bookstack
         ports:
         - containerPort: 80
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
         volumeMounts:
-        - name: data
-          mountPath: /config
+        - mountPath: /config
+          name: data
       volumes:
       - name: data
         persistentVolumeClaim:
