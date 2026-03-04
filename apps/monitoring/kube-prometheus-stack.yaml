@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: "58.2.2"
+    helm:
+      releaseName: kube-prometheus-stack
+      values: |
+        grafana:
+          enabled: true
+          adminPassword: "changeme"
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - borgling-1.tail20def8.ts.net
+            path: /grafana
+            pathType: Prefix
+          grafana.ini:
+            server:
+              root_url: "https://borgling-1.tail20def8.ts.net:8443/grafana"
+              serve_from_sub_path: true
+          persistence:
+            enabled: true
+            size: 10Gi
+            storageClassName: local-path
+        prometheus:
+          prometheusSpec:
+            routePrefix: /prometheus
+            externalUrl: "https://borgling-1.tail20def8.ts.net:8443/prometheus"
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: local-path
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
+          ingress:
+            enabled: true
+            ingressClassName: nginx
+            hosts:
+              - borgling-1.tail20def8.ts.net
+            paths:
+              - /prometheus
+            pathType: Prefix
+        alertmanager:
+          enabled: false
+        nodeExporter:
+          enabled: true
+        kubeStateMetrics:
+          enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
