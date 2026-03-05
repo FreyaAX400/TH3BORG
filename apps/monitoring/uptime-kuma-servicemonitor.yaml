@@ -13,3 +13,6 @@ spec:
     - port: http
       path: /metrics
       interval: 60s
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
