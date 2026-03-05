@@ -15,7 +15,7 @@ spec:
         grafana:
           enabled: true
           image:
-            tag: "12.0.0"
+            tag: "12.4.0"
           adminPassword: "changeme"
           ingress:
             enabled: true
