@@ -13,4 +13,13 @@ spec:
     - port: http
       path: /metrics
       interval: 60s
-      scheme: http
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
+      basicAuth:
+        username:
+          name: uptime-kuma-metrics-auth
+          key: username
+        password:
+          name: uptime-kuma-metrics-auth
+          key: password
