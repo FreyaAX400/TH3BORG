@@ -24,8 +24,6 @@ spec:
           ingressClassName: nginx
           hostname: borgling-1.tail20def8.ts.net
           path: /sentry
-          annotations:
-            nginx.ingress.kubernetes.io/use-regex: "true"
         filestore:
           backend: filesystem
           filesystem:
@@ -39,6 +37,10 @@ spec:
           primary:
             nodeSelector:
               kubernetes.io/hostname: borgling-1
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
             persistence:
               size: 20Gi
               storageClass: local-path
@@ -47,37 +49,101 @@ spec:
           master:
             nodeSelector:
               kubernetes.io/hostname: borgling-1
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
+          replica:
+            nodeSelector:
+              kubernetes.io/hostname: borgling-1
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
         kafka:
           enabled: true
           controller:
             replicaCount: 1
             nodeSelector:
               kubernetes.io/hostname: borgling-1
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
         clickhouse:
           enabled: true
           clickhouse:
             replicas: 1
             nodeSelector:
               kubernetes.io/hostname: borgling-1
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
         hooks:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
         web:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
         worker:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
         cron:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
         snuba:
           api:
             nodeSelector:
               kubernetes.io/hostname: borgling-1
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
         relay:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+        taskbroker:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+        taskworker:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+        taskscheduler:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
   destination:
     server: https://kubernetes.default.svc
     namespace: sentry
