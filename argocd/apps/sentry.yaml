@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sentry
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://sentry-kubernetes.github.io/charts
+    chart: sentry
+    targetRevision: "20.9.0"
+    helm:
+      releaseName: sentry
+      values: |
+        user:
+          email: freyaax400@example.com
+          password: "changeme"
+        system:
+          secretKey: "changeme-replace-with-random-string"
+        nginx:
+          enabled: false
+        ingress:
+          enabled: true
+          ingressClassName: nginx
+          hostname: borgling-1.tail20def8.ts.net
+          path: /sentry
+        filestore:
+          backend: filesystem
+          filesystem:
+            path: /data/sentry-files
+            persistence:
+              enabled: true
+              size: 20Gi
+              storageClass: local-path
+        postgresql:
+          enabled: true
+          primary:
+            nodeSelector:
+              kubernetes.io/hostname: borgling-1
+            persistence:
+              size: 20Gi
+              storageClass: local-path
+        redis:
+          enabled: true
+          master:
+            nodeSelector:
+              kubernetes.io/hostname: borgling-1
+        kafka:
+          enabled: false
+        clickhouse:
+          enabled: true
+          clickhouse:
+            replicas: 1
+            nodeSelector:
+              kubernetes.io/hostname: borgling-1
+        hooks:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+        web:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+        worker:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+        cron:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sentry
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
