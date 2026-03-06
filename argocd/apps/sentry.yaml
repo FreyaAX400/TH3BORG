@@ -32,6 +32,11 @@ spec:
               enabled: true
               size: 20Gi
               storageClass: local-path
+        kafka:
+          enabled: false
+        externalKafka:
+          host: "localhost"
+          port: 9092
         postgresql:
           enabled: true
           primary:
@@ -45,8 +50,6 @@ spec:
           master:
             nodeSelector:
               kubernetes.io/hostname: borgling-1
-        kafka:
-          enabled: false
         clickhouse:
           enabled: true
           clickhouse:
@@ -60,8 +63,8 @@ spec:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
         worker:
-          nodeSelector:
-            kubernetes.io/hostname: borgling-1
+            nodeSelector:
+              kubernetes.io/hostname: borgling-1
         cron:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
