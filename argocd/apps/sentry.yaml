@@ -13,7 +13,7 @@ spec:
       releaseName: sentry
       values: |
         user:
-          email: freyaax400@example.com
+          email: esme-parastrata.rebuff148@slmails.com
           password: "changeme"
         system:
           secretKey: "changeme-replace-with-random-string"
