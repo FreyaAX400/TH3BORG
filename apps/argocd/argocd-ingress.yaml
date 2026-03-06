@@ -1,0 +1,1 @@
+# Traefik ingress removed - ArgoCD now served via Tailscale serve on port 8445
