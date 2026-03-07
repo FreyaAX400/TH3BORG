@@ -30,6 +30,9 @@ spec:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
               effect: NoSchedule
+          containers:
+            - name: clickhouse
+              image: altinity/clickhouse-server:23.3.13.7.altinitystable
     volumeClaimTemplates:
       - name: data
         spec:
