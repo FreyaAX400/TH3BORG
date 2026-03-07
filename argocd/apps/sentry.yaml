@@ -21,19 +21,16 @@ spec:
           enabled: false
         ingress:
           enabled: false
-          ingressClassName: nginx
-          hostname: borgling-1.tail20def8.ts.net
-          path: /sentry
         filestore:
           backend: filesystem
           filesystem:
             path: /data/sentry-files
             persistence:
-              enabled: false
+              enabled: true
               size: 20Gi
               storageClass: local-path
         postgresql:
-          enabled: false
+          enabled: true
           primary:
             nodeSelector:
               kubernetes.io/hostname: borgling-1
@@ -45,7 +42,7 @@ spec:
               size: 20Gi
               storageClass: local-path
         redis:
-          enabled: false
+          enabled: true
           master:
             nodeSelector:
               kubernetes.io/hostname: borgling-1
@@ -61,7 +58,7 @@ spec:
                 operator: Exists
                 effect: NoSchedule
         kafka:
-          enabled: false
+          enabled: true
           controller:
             replicaCount: 1
             nodeSelector:
@@ -71,7 +68,7 @@ spec:
                 operator: Exists
                 effect: NoSchedule
         clickhouse:
-          enabled: false
+          enabled: true
           clickhouse:
             replicas: 1
             nodeSelector:
@@ -137,9 +134,6 @@ spec:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
               effect: NoSchedule
-        externalRedis:
-          host: "sentry-sentry-redis-master"
-          port: 6379
         taskscheduler:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
