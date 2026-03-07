@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: glitchtip-postgres-pvc
+  namespace: glitchtip
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: glitchtip-postgres
+  namespace: glitchtip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: glitchtip-postgres
+  template:
+    metadata:
+      labels:
+        app: glitchtip-postgres
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: borgling-1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: postgres
+          image: postgres:17
+          env:
+            - name: POSTGRES_DB
+              value: glitchtip
+            - name: POSTGRES_USER
+              value: glitchtip
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: glitchtip-env
+                  key: DB_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+              subPath: postgres
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: glitchtip-postgres-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: glitchtip-postgres
+  namespace: glitchtip
+spec:
+  selector:
+    app: glitchtip-postgres
+  ports:
+    - port: 5432

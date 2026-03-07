@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: glitchtip-migrate
+  namespace: glitchtip
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      nodeSelector:
+        kubernetes.io/hostname: borgling-1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: migrate
+          image: glitchtip/glitchtip:latest
+          command: ["./bin/run-migrate.sh"]
+          envFrom:
+            - secretRef:
+                name: glitchtip-env
+          env:
+            - name: EMAIL_URL
+              value: consolemail://
+            - name: GLITCHTIP_DOMAIN
+              value: "https://borgling-1.tail20def8.ts.net:8447"

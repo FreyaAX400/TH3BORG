@@ -6,66 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://gitlab.com/api/v4/projects/16325141/packages/helm/stable
-    chart: glitchtip
-    targetRevision: "7.0.0"
-    helm:
-      releaseName: glitchtip
-      values: |
-        secret:
-          SECRET_KEY: "Atw9l9ILoxTv6+1a1sdn9MHOzPBF1eGY5tOCOwNijeVODt3K7tUrF6/kskB1v5tJ
-00U="
-        existingSecret: "glitchtip-env"
-        migrationJob:
-          database:
-            existingSecret: "glitchtip-env"
-        web:
-          replicaCount: 1
-          database:
-            existingSecret: "glitchtip-env"
-          nodeSelector:
-            kubernetes.io/hostname: borgling-1
-          tolerations:
-            - key: node-role.kubernetes.io/control-plane
-              operator: Exists
-              effect: NoSchedule
-        worker:
-          database:
-            existingSecret: "glitchtip-env"
-          nodeSelector:
-            kubernetes.io/hostname: borgling-1
-          tolerations:
-            - key: node-role.kubernetes.io/control-plane
-              operator: Exists
-              effect: NoSchedule
-        beat:
-          nodeSelector:
-            kubernetes.io/hostname: borgling-1
-          tolerations:
-            - key: node-role.kubernetes.io/control-plane
-              operator: Exists
-              effect: NoSchedule
-        postgresql:
-          primary:
-            nodeSelector:
-              kubernetes.io/hostname: borgling-1
-            tolerations:
-              - key: node-role.kubernetes.io/control-plane
-                operator: Exists
-                effect: NoSchedule
-            persistence:
-              size: 10Gi
-              storageClass: local-path
-        valkey:
-          primary:
-            nodeSelector:
-              kubernetes.io/hostname: borgling-1
-            tolerations:
-              - key: node-role.kubernetes.io/control-plane
-                operator: Exists
-                effect: NoSchedule
-        ingress:
-          enabled: false
+    repoURL: https://github.com/FreyaAX400/TH3BORG.git
+    targetRevision: HEAD
+    path: apps/glitchtip
   destination:
     server: https://kubernetes.default.svc
     namespace: glitchtip
