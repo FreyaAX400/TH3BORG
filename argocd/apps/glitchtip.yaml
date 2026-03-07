@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: glitchtip
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://glitchtip.github.io/glitchtip-chart
+    chart: glitchtip
+    targetRevision: "3.1.0"
+    helm:
+      releaseName: glitchtip
+      values: |
+        glitchtip:
+          email: esme-parastrata.rebuff148@slmails.com
+          defaultFromEmail: glitchtip@borgling-1.tail20def8.ts.net
+          secretKey: "changeme-replace-with-random-string"
+        web:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+        worker:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+        postgresql:
+          enabled: true
+          primary:
+            nodeSelector:
+              kubernetes.io/hostname: borgling-1
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
+            persistence:
+              size: 10Gi
+              storageClass: local-path
+        redis:
+          enabled: true
+          master:
+            nodeSelector:
+              kubernetes.io/hostname: borgling-1
+            tolerations:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+                effect: NoSchedule
+        ingress:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: glitchtip
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
