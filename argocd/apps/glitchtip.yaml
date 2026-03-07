@@ -13,8 +13,9 @@ spec:
       releaseName: glitchtip
       values: |
         secret:
-          SECRET_KEY: "eJDOQebEh4S3tOpib4hSV+bnE2W1a1CD0ICfYfm9Iq4dmm/Tzev//IbDeECN4f6M
-5n0="
+          SECRET_KEY: "Atw9l9ILoxTv6+1a1sdn9MHOzPBF1eGY5tOCOwNijeVODt3K7tUrF6/kskB1v5tJ
+00U="
+        existingSecret: "glitchtip-pg-app"
         migrationJob:
           database:
             existingSecret: "glitchtip-pg-app"
@@ -38,8 +39,6 @@ spec:
               operator: Exists
               effect: NoSchedule
         beat:
-          database:
-            existingSecret: "glitchtip-pg-app"
           nodeSelector:
             kubernetes.io/hostname: borgling-1
           tolerations:
