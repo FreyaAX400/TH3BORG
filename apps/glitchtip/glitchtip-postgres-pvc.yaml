@@ -4,7 +4,8 @@ metadata:
   name: glitchtip-postgres-pvc
   namespace: glitchtip
 spec:
-  accessModes: [ReadWriteOnce]
+  accessModes:
+    - ReadWriteOnce
   storageClassName: local-path
   resources:
     requests:
