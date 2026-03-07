@@ -10,6 +10,8 @@ spec:
         layout:
           shardsCount: 1
           replicasCount: 1
+        templates:
+          podTemplate: borgling-1
     users:
       sentry/password: "changeme"
       sentry/networks/ip:
@@ -20,7 +22,7 @@ spec:
       max_connections: 100
   templates:
     podTemplates:
-      - name: default
+      - name: borgling-1
         spec:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
