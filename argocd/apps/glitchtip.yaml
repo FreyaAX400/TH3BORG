@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://gitlab.com/api/v4/projects/16325141/packages/helm/stable
     chart: glitchtip
-    targetRevision: "7.0.0"
+    targetRevision: "7.1.0"
     helm:
       releaseName: glitchtip
       values: |
