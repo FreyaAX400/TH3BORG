@@ -1,0 +1,39 @@
+apiVersion: clickhouse.altinity.com/v1
+kind: ClickHouseInstallation
+metadata:
+  name: sentry
+  namespace: clickhouse
+spec:
+  configuration:
+    clusters:
+      - name: sentry
+        layout:
+          shardsCount: 1
+          replicasCount: 1
+    users:
+      sentry/password: "changeme"
+      sentry/networks/ip:
+        - "0.0.0.0/0"
+    profiles:
+      default/max_memory_usage: 10000000000
+    settings:
+      max_connections: 100
+  templates:
+    podTemplates:
+      - name: default
+        spec:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+    volumeClaimTemplates:
+      - name: data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: local-path
+          resources:
+            requests:
+              storage: 20Gi
