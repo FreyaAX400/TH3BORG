@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: glitchtip-worker
+  namespace: glitchtip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: glitchtip-worker
+  template:
+    metadata:
+      labels:
+        app: glitchtip-worker
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: borgling-1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: glitchtip
+          image: glitchtip/glitchtip:latest
+          command: ["./bin/run-celery-with-beat.sh"]
+          envFrom:
+            - secretRef:
+                name: glitchtip-env
+          env:
+            - name: EMAIL_URL
+              value: consolemail://
+            - name: GLITCHTIP_DOMAIN
+              value: "https://borgling-1.tail20def8.ts.net:8447"
+            - name: DEFAULT_FROM_EMAIL
+              value: glitchtip@borgling-1.tail20def8.ts.net
+          volumeMounts:
+            - name: uploads
+              mountPath: /code/uploads
+      volumes:
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: glitchtip-uploads-pvc
