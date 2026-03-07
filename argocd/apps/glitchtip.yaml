@@ -12,10 +12,9 @@ spec:
     helm:
       releaseName: glitchtip
       values: |
-        glitchtip:
-          email: esme-parastrata.rebuff148@slmails.com
-          defaultFromEmail: glitchtip@borgling-1.tail20def8.ts.net
-          secretKey: "changeme-replace-with-random-string"
+        secret:
+          SECRET_KEY: "OXNZNpBqO+YS8pHzYy6CPaA3stI8apR2UqsvxYzHiMLm4XxPD349bDNY2gmWJ8o2
+1Co="
         web:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
@@ -31,7 +30,6 @@ spec:
               operator: Exists
               effect: NoSchedule
         postgresql:
-          enabled: true
           primary:
             nodeSelector:
               kubernetes.io/hostname: borgling-1
@@ -42,9 +40,8 @@ spec:
             persistence:
               size: 10Gi
               storageClass: local-path
-        redis:
-          enabled: true
-          master:
+        valkey:
+          primary:
             nodeSelector:
               kubernetes.io/hostname: borgling-1
             tolerations:
