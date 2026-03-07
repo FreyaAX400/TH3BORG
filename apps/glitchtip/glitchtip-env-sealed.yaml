@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: glitchtip-env
+  namespace: glitchtip
+spec:
+  encryptedData:
+    DATABASE_PASSWORD: AgBjOIqu+9zFS8yB1UbmGE0ycb9HCAgoEWRzSHvIoClYTlBb4Dm+zQxZUu3CleKxqTsOd8SgXWO1+3NmLCwJsgMKif9dlCXw+xsX0rhMmYvArYcS0t/9bYrvcp/oe/jP95q5ZOl8eGM3duYp4RY4TtaO5Qc8vd1nb4kdhFzXhS+19mhQHBvB8lnd4YWxT4SxCfJMfbeuIW11U44jNodawSUJ8fE3Ss5f5dWH7XZLll12wvq+96dvZLoM2cQB+mePp6Snq07ZZmWtJrrE5Scwk9ohsRBtpLTSbra3KzF+oLKNc4+S2L7537fb8seiEzGmCLgK9v1tdVDGg8oM8ch1wSuHPFt31xsf5dW1JVk2DNp1Z+K8FKz/KS/xlToGkZ1lcTEXA6aQIbs9WceD4N5LS/zcXEExgHnImUL/jDRc3d8SDECn/q3mVUAY6Z0HTiELvKFqCMNP2kpR1W/DQoX7sNyNEIou5SE3dbez17NRtt0dboof/q0aa3r/nHMENDlnY6hosmjcvrRJCwmWZbQjnNb6pDoTq2SrJTxfGO7QhRiUGxcbTp9B+m40CYonJQI0Z0D+PpwNGNiaYMfdHNBhn/cPPUqENGAQk3gtW6Tsj8yng0pXTc7cOHkOf1z9lSXBjeUVMTmFF51XRdpB1FrnWobr0cB4bdO3quSzYbKhEuP7Qe5a6QfNlBsyAglfzSczgeGHfLzCNbEYUC3vU5XgPv5pAHwwe9A0MbcDcJ3KnNJ50ZQznm5depfeUZaXQ50lra+Are5djAy9rHrwBsnr8hIK
+  template:
+    metadata:
+      name: glitchtip-env
+      namespace: glitchtip
