@@ -120,6 +120,12 @@ spec:
             - key: node-role.kubernetes.io/control-plane
               operator: Exists
               effect: NoSchedule
+        externalKafka:
+          host: "sentry-kafka"
+          port: 9092
+        externalRedis:
+          host: "sentry-sentry-redis-master"
+          port: 6379
         taskbroker:
           nodeSelector:
             kubernetes.io/hostname: borgling-1
