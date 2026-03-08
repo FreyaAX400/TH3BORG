@@ -5,21 +5,32 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  sources:
-    - repoURL: https://kubernetes.github.io/ingress-nginx
-      chart: ingress-nginx
-      targetRevision: "4.14.3"
-      helm:
-        values: |
-          controller:
-            service:
-              type: LoadBalancer
-              ports:
-                http: 8080
-                https: 8443
-            ingressClassResource:
-              name: nginx
-              default: false
+  source:
+    repoURL: https://helm.nginx.com/stable
+    chart: nginx-ingress
+    targetRevision: "2.4.4"
+    helm:
+      releaseName: nginx-ingress
+      values: |
+        controller:
+          nodeSelector:
+            kubernetes.io/hostname: borgling-1
+          tolerations:
+            - key: node-role.kubernetes.io/control-plane
+              operator: Exists
+              effect: NoSchedule
+          ingressClass:
+            name: nginx
+            create: true
+            setAsDefaultIngress: false
+          service:
+            type: LoadBalancer
+            httpPort:
+              enable: true
+              port: 8080
+            httpsPort:
+              enable: true
+              port: 8443
   destination:
     server: https://kubernetes.default.svc
     namespace: nginx-ingress
@@ -29,3 +40,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true

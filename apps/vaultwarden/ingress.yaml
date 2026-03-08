@@ -4,7 +4,7 @@ metadata:
   name: vaultwarden
   namespace: vaultwarden
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "128m"
+    nginx.org/client-max-body-size: "128m"
 spec:
   ingressClassName: nginx
   rules:
