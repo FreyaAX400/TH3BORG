@@ -30,7 +30,7 @@ spec:
             - name: EMAIL_URL
               value: consolemail://
             - name: GLITCHTIP_DOMAIN
-              value: "https://borgling-1.tail20def8.ts.net:8446"
+              value: "https://glitchtip.th3borg.org"
             - name: DEFAULT_FROM_EMAIL
               value: glitchtip@borgling-1.tail20def8.ts.net
           volumeMounts:
