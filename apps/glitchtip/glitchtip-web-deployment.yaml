@@ -34,6 +34,8 @@ spec:
               value: consolemail://
             - name: GLITCHTIP_DOMAIN
               value: "https://glitchtip.th3borg.org"
+            - name: CSRF_TRUSTED_ORIGINS
+              value: "https://glitchtip.th3borg.org"
             - name: DEFAULT_FROM_EMAIL
               value: glitchtip@borgling-1.tail20def8.ts.net
           volumeMounts:
