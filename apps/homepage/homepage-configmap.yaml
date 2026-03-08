@@ -120,10 +120,12 @@ data:
     style=\"color:var(--red)\">DEGRADED</span>':\"PARTIAL\";\n}\nasync function checkServices()
     {\n  const results=await Promise.all(SERVICES.map(async s=>{ const t=Date.now();
     try{ await fetch(s.url,{method:\"HEAD\",mode:\"no-cors\",signal:AbortSignal.timeout(5000)});
-    return{...s,status:\"up\",ping:Date.now()-t}; }catch{ return{...s,status:\"down\",ping:null};
-    } }));\n  renderServices(results);\n}\nasync function fetchStats() {\n  const
-    el=document.getElementById(\"stats-content\");\n  try {\n    const b=\"https://prometheus.th3borg.org/api/v1/\";\n
-    \   const [cpu,memT,memA,pods]=await Promise.all([\n      fetch(b+'query?query=100-(avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))*100)').then(r=>r.json()).catch(()=>null),\n
+    return{...s,status:\"up\",ping:Date.now()-t}\n      } catch(e) { if(e.name===\"TimeoutError\"||e.name===\"AbortError\")
+    return{...s,status:\"down\",ping:null}; return{...s,status:\"up\",ping:Date.now()-t};;
+    }catch{ return{...s,status:\"down\",ping:null}; } }));\n  renderServices(results);\n}\nasync
+    function fetchStats() {\n  const el=document.getElementById(\"stats-content\");\n
+    \ try {\n    const b=\"https://prometheus.th3borg.org/api/v1/\";\n    const [cpu,memT,memA,pods]=await
+    Promise.all([\n      fetch(b+'query?query=100-(avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))*100)').then(r=>r.json()).catch(()=>null),\n
     \     fetch(b+\"query?query=node_memory_MemTotal_bytes\").then(r=>r.json()).catch(()=>null),\n
     \     fetch(b+\"query?query=node_memory_MemAvailable_bytes\").then(r=>r.json()).catch(()=>null),\n
     \     fetch(b+'query?query=count(kube_pod_info{namespace!=\"kube-system\"})').then(r=>r.json()).catch(()=>null),\n

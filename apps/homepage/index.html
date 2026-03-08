@@ -105,7 +105,8 @@ function renderServices(results) {
   document.getElementById("cluster-status").innerHTML=allUp?"ALL SYSTEMS NOMINAL":anyDown?'<span style="color:var(--red)">DEGRADED</span>':"PARTIAL";
 }
 async function checkServices() {
-  const results=await Promise.all(SERVICES.map(async s=>{ const t=Date.now(); try{ await fetch(s.url,{method:"HEAD",mode:"no-cors",signal:AbortSignal.timeout(5000)}); return{...s,status:"up",ping:Date.now()-t}; }catch{ return{...s,status:"down",ping:null}; } }));
+  const results=await Promise.all(SERVICES.map(async s=>{ const t=Date.now(); try{ await fetch(s.url,{method:"HEAD",mode:"no-cors",signal:AbortSignal.timeout(5000)}); return{...s,status:"up",ping:Date.now()-t}
+      } catch(e) { if(e.name==="TimeoutError"||e.name==="AbortError") return{...s,status:"down",ping:null}; return{...s,status:"up",ping:Date.now()-t};; }catch{ return{...s,status:"down",ping:null}; } }));
   renderServices(results);
 }
 async function fetchStats() {
