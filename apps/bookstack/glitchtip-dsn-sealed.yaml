@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: glitchtip-dsn
+  namespace: bookstack
+spec:
+  encryptedData:
+    GLITCHTIP_DSN: AgCMzFawkZ9XJolDBSrQnKy/LVupXhq7LK9lIHqQilwrydk1uLBolxsrw+iymIH3rbvez5Ia57jScwiFzEPSU3yEi9DXfvILXrW3hxF53P/eX2BxGV6Vwq9qzWMw1rg3jLY7x+f2WNjOvrQXLgGYn0oF+iFvF83RbJl9FZXY/A5fElgdjtQX7LpUNBUrHj6LqM85+63ph3clIDa6MpwEmkQ9zWO2ZlYhfiPn8FeApPOOgVg/kVp9NzC5nnpAE1xSMqhuLaEnqzm6lL9sebHzF1EOrEN9bps53I4nekjLNByXKrRP2pRrX3mh+IJzlCv9Hy7AYRvXN/WCh/u8zInCmko9aLIBa94pF51nsHO+h3+Slrh/SSzmkpQzgidfyuWvF6wWfbB/78gtOQydZCTd8+heqce8bogpC9mmwFmOMICKrfPbMMt2fI+u5f7uDmfM0DDzIZlpNrWkW7rA3xv/T+5oaQ0M81Wn/VVyBQv5VJ5m3p3NUHOl5tPH5PNXwoXyhUaRYg3kA+syTjygVHSPUKdBwge4fiXJphwf/wM7aVZYDXkxEwAiJ14+YIXNrfcW/m+A8jdkJ0N3dsvptuZjqaQxGSecJ59e6woKkIQc618FqzcqOSYl98u/vQChnX4Z7cPRtiKUD0GwYGSiV47JCdlNfk1JcYR+CBftopZvnou4ccxN8eNt8IxVgxN6wN6l/qqh2vlQ1ydIRtaYl/VhfRJ6Z3FzXBXtWEbVPJL0JbajA6LbnyIFttjCUvD3aFWqdSmWMdPven2VdeFmdpouLm5ctYM6xIKDAPG10lIO
+  template:
+    metadata:
+      name: glitchtip-dsn
+      namespace: bookstack

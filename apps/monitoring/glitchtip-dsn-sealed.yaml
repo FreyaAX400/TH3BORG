@@ -1,0 +1,13 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  name: glitchtip-dsn
+  namespace: monitoring
+spec:
+  encryptedData:
+    GLITCHTIP_DSN: AgChghEg9fkWtLfhdE4FDskfw1Ac0JVeLORHdqJYK3+kutDdSm08iCLY90nCuaUdJGyDDBJWp70Ktaa8OpE9DbLy8XKEBhYhj97yDNY7YvvyTYIIayF/hNHg2Grd4f9teD20vzUDrXs2rPclgFMztyKfo/yI0YYrz/jQ4MRYm2fL0D7jBiam/KgU8HFb/Ya5Sk+t5Lftxf7JV2GQN78DgBEK1bP7j4mn8Z4PBDuIkpmLy5ZzuwoyBGacucLhjLrmCXrB9elHbEP1Su7cjRItKOCb/5Dpcb16RpHOFILtmSiar7AUolpgknF4bu9oItyIjzjkSs4As3ZEuLPSPa8Enll2H+N256tQDVAP3vxQoT+Dt8GFqaRy14Vyu5GS8SOPrS/VzmLLOSeIPs/SyLTSsF6yAP3heQBky1WwuQqXMEF4/X2pSZrhfk3+Z9iiPa4np/ugD5rY35O4PnnOl3Bl7V8HfnAjB6fsTlbjgkf2cQ/rfzJNinD0ObDAD2Pam3oOpSNN9gg8S5yjk3MvaqEHsNpRxCNXw4qNyMSWbvv7vrJgwLJTTa50MOA4ju2DefW40wsl3YGWUS2V+PwnvwJoPcpXhWdYKTmadoCqdoh+tBzDayc2K5+1UkdD3p4TAeg2KBX+ZaOvcxmaT8sOYMJ2CrWJ2Bcxy9Yd+zx3rV0N2KQ3R/KbncsSbiYM9unA7rB1oLVF8BIxBu9A3j8cKtl7X55Q0dl2jz5cktV13beQievguw4buoJUrxU1BvdVylTtSe04dpknq9dN/yeADmKfWmLNFZo+3DMvSj0lPmgh
+  template:
+    metadata:
+      name: glitchtip-dsn
+      namespace: monitoring

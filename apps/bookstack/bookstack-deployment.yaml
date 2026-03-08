@@ -38,6 +38,11 @@ spec:
               key: password
               name: bookstack-db-secret
         - name: DB_DATABASE
+        - name: SENTRY_LARAVEL_DSN
+          valueFrom:
+            secretKeyRef:
+              name: glitchtip-dsn
+              key: GLITCHTIP_DSN
           value: bookstack
         image: lscr.io/linuxserver/bookstack:latest
         name: bookstack
