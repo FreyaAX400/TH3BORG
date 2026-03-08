@@ -27,6 +27,8 @@ spec:
           volumeMounts:
             - name: html
               mountPath: /usr/share/nginx/html
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
         - name: sidecar
           image: localhost:32000/th3borg/homepage-sidecar:latest
           ports:
@@ -45,3 +47,6 @@ spec:
         - name: html
           configMap:
             name: homepage-html
+        - name: nginx-conf
+          configMap:
+            name: homepage-nginx-conf

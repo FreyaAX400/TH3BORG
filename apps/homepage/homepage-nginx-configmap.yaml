@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-nginx-conf
+  namespace: homepage
+data:
+  default.conf: |
+    server {
+      listen 80;
+      root /usr/share/nginx/html;
+      index index.html;
+      location /api/ {
+        proxy_pass http://localhost:8000/api/;
+        proxy_set_header Host $host;
+      }
+      location / {
+        try_files $uri $uri/ /index.html;
+      }
+    }
