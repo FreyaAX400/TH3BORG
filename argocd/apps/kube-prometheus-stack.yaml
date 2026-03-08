@@ -26,8 +26,8 @@ spec:
             pathType: Prefix
           grafana.ini:
             server:
-              root_url: "https://borgling-1.tail20def8.ts.net:8443/grafana"
-              serve_from_sub_path: true
+              root_url: "https://grafana.th3borg.org"
+              serve_from_sub_path: false
           persistence:
             enabled: true
             size: 10Gi
