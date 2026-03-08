@@ -86,60 +86,33 @@
   <div class="footer"><span>TH3BORG HOMELAB // th3borg.org</span><span id="last-refresh">LAST REFRESH: --</span></div>
 </div>
 <script>
-const SERVICES = [
-  { name: "VAULTWARDEN", url: "https://vaultwarden.th3borg.org" },
-  { name: "BOOKSTACK",   url: "https://bookstack.th3borg.org" },
-  { name: "GRAFANA",     url: "https://grafana.th3borg.org" },
-  { name: "GLITCHTIP",   url: "https://glitchtip.th3borg.org" },
-  { name: "ARGOCD",      url: "https://argocd.th3borg.org" },
-  { name: "UPTIME KUMA", url: "https://uptime.th3borg.org" },
-  { name: "LIVESYNC",    url: "https://livesync.th3borg.org" },
-];
 function updateClock() { document.getElementById("sys-time").textContent = new Date().toLocaleTimeString("en-GB",{hour12:false}); }
 setInterval(updateClock,1000); updateClock();
 const startTime = Date.now();
 setInterval(()=>{ const s=Math.floor((Date.now()-startTime)/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; document.getElementById("page-uptime").textContent=h>0?h+"h "+m+"m "+sec+"s":m>0?m+"m "+sec+"s":sec+"s"; },1000);
-function renderServices(results) {
-  document.getElementById("service-list").innerHTML=results.map(s=>`<a class="service-item" href="${s.url}" target="_blank" rel="noopener"><div class="service-dot ${s.status}"></div><span class="service-name">${s.name}</span><span class="service-url">${s.url.replace("https://","")}</span>${s.ping?`<span class="service-ping">${s.ping}ms</span>`:""}</a>`).join("");
-  const allUp=results.every(s=>s.status==="up"),anyDown=results.some(s=>s.status==="down");
-  document.getElementById("cluster-status").innerHTML=allUp?"ALL SYSTEMS NOMINAL":anyDown?'<span style="color:var(--red)">DEGRADED</span>':"PARTIAL";
-}
-async function checkServices() {
-  const results=await Promise.all(SERVICES.map(async s=>{ const t=Date.now(); try{ const r=await fetch(s.url,{method:"HEAD",signal:AbortSignal.timeout(5000)}); return{...s,status:r.ok||r.status<400?"up":"down",ping:Date.now()-t}; }catch(e){ if(e.name==="AbortError"||e.name==="TimeoutError") return{...s,status:"down",ping:null}; return{...s,status:"up",ping:Date.now()-t}; } }));
-  renderServices(results);
-}); return{...s,status:"up",ping:Date.now()-t}
-      } catch(e) { if(e.name==="TimeoutError"||e.name==="AbortError") return{...s,status:"down",ping:null}; return{...s,status:"up",ping:Date.now()-t};; }catch{ return{...s,status:"down",ping:null}; } }));
-  renderServices(results);
-}
-async function fetchStats() {
-  const el=document.getElementById("stats-content");
+
+async function refresh() {
   try {
-    const b="https://prometheus.th3borg.org/api/v1/";
-    const [cpu,memT,memA,pods]=await Promise.all([
-      fetch(b+'query?query=100-(avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))*100)').then(r=>r.json()).catch(()=>null),
-      fetch(b+"query?query=node_memory_MemTotal_bytes").then(r=>r.json()).catch(()=>null),
-      fetch(b+"query?query=node_memory_MemAvailable_bytes").then(r=>r.json()).catch(()=>null),
-      fetch(b+'query?query=count(kube_pod_info{namespace!="kube-system"})').then(r=>r.json()).catch(()=>null),
-    ]);
-    const cpuP=cpu?parseFloat(cpu.data.result[0]?.value[1]||0).toFixed(1):null;
-    const mTG=memT?(parseFloat(memT.data.result[0]?.value[1])/1073741824).toFixed(1):null;
-    const mAG=memA?(parseFloat(memA.data.result[0]?.value[1])/1073741824).toFixed(1):null;
-    const mP=mTG&&mAG?(((mTG-mAG)/mTG)*100).toFixed(1):null;
-    const pc=pods?pods.data.result[0]?.value[1]:null;
-    el.innerHTML=`<div class="stat-row"><div class="stat-label"><span>CPU USAGE</span><span>${cpuP??"??"}%</span></div><div class="stat-bar"><div class="stat-fill ${cpuP>80?"critical":cpuP>60?"warning":""}" style="width:${cpuP??0}%"></div></div></div><div class="stat-row"><div class="stat-label"><span>MEMORY</span><span>${mP??"??"}% (${mAG??"??"}GB free)</span></div><div class="stat-bar"><div class="stat-fill ${mP>85?"critical":mP>70?"warning":""}" style="width:${mP??0}%"></div></div></div><div class="node-info"><div>TOTAL RAM: <span>${mTG??"??"}GB</span></div><div>PODS: <span>${pc??"??"}</span></div><div>ARCH: <span>ARM64</span></div><div>K3S: <span>ACTIVE</span></div></div>`;
-  } catch(e){ el.innerHTML=`<div class="loading">PROMETHEUS UNREACHABLE</div>`; }
+    const data = await fetch("/api/status").then(r=>r.json());
+
+    document.getElementById("service-list").innerHTML = data.services.map(s=>`<a class="service-item" href="${s.url}" target="_blank" rel="noopener"><div class="service-dot ${s.status}"></div><span class="service-name">${s.name}</span><span class="service-url">${s.url.replace("https://","")}</span>${s.ping?`<span class="service-ping">${s.ping}ms</span>`:""}</a>`).join("");
+    const allUp=data.services.every(s=>s.status==="up"), anyDown=data.services.some(s=>s.status==="down");
+    document.getElementById("cluster-status").innerHTML=allUp?"ALL SYSTEMS NOMINAL":anyDown?'<span style="color:var(--red)">DEGRADED</span>':"PARTIAL";
+
+    const c = data.cluster;
+    const cpuCls = c.cpu_pct>80?"critical":c.cpu_pct>60?"warning":"";
+    const memCls = c.mem_used_pct>85?"critical":c.mem_used_pct>70?"warning":"";
+    document.getElementById("stats-content").innerHTML=`<div class="stat-row"><div class="stat-label"><span>CPU USAGE</span><span>${c.cpu_pct??"??"}%</span></div><div class="stat-bar"><div class="stat-fill ${cpuCls}" style="width:${c.cpu_pct??0}%"></div></div></div><div class="stat-row"><div class="stat-label"><span>MEMORY</span><span>${c.mem_used_pct??"??"}% (${c.mem_avail_gb??"??"}GB free)</span></div><div class="stat-bar"><div class="stat-fill ${memCls}" style="width:${c.mem_used_pct??0}%"></div></div></div><div class="node-info"><div>TOTAL RAM: <span>${c.mem_total_gb??"??"}GB</span></div><div>PODS: <span>${c.pods??"??"}</span></div><div>ARCH: <span>ARM64</span></div><div>K3S: <span>ACTIVE</span></div></div>`;
+
+    const el = document.getElementById("error-list");
+    if(!data.errors||!data.errors.length){ el.innerHTML='<div class="no-errors">NO RECENT ERRORS DETECTED</div>'; }
+    else { el.innerHTML=data.errors.map(i=>`<div class="error-item ${i.level==="warning"?"warning":""}"><div class="error-title">${i.title}</div><div class="error-meta">${i.project} // ${i.count} occurrences // ${new Date(i.lastSeen).toLocaleString()}</div></div>`).join(""); }
+
+    document.getElementById("last-refresh").textContent="LAST REFRESH: "+new Date().toLocaleTimeString("en-GB",{hour12:false});
+  } catch(e) {
+    console.error("Status fetch failed:", e);
+  }
 }
-async function fetchErrors() {
-  const el=document.getElementById("error-list");
-  try {
-    const r=await fetch("https://glitchtip.th3borg.org/api/0/issues/?limit=8",{headers:{"Authorization":"Bearer GLITCHTIP_API_TOKEN"}});
-    if(!r.ok) throw new Error("auth");
-    const issues=await r.json();
-    if(!issues.length){ el.innerHTML=`<div class="no-errors">NO RECENT ERRORS DETECTED</div>`; return; }
-    el.innerHTML=issues.map(i=>`<div class="error-item ${i.level==="warning"?"warning":""}"><div class="error-title">${i.title||i.culprit}</div><div class="error-meta">${i.project?.name??"unknown"} // ${i.count} occurrences // ${new Date(i.lastSeen).toLocaleString()}</div></div>`).join("");
-  } catch(e){ el.innerHTML=`<div class="no-errors">CONFIGURE API TOKEN TO VIEW ERRORS</div>`; }
-}
-function refresh(){ checkServices(); fetchStats(); fetchErrors(); document.getElementById("last-refresh").textContent="LAST REFRESH: "+new Date().toLocaleTimeString("en-GB",{hour12:false}); }
 refresh(); setInterval(refresh,30000);
 </script>
 </body>
