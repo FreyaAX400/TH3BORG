@@ -119,7 +119,10 @@ data:
     \ document.getElementById(\"cluster-status\").innerHTML=allUp?\"ALL SYSTEMS NOMINAL\":anyDown?'<span
     style=\"color:var(--red)\">DEGRADED</span>':\"PARTIAL\";\n}\nasync function checkServices()
     {\n  const results=await Promise.all(SERVICES.map(async s=>{ const t=Date.now();
-    try{ await fetch(s.url,{method:\"HEAD\",mode:\"no-cors\",signal:AbortSignal.timeout(5000)});
+    try{ const r=await fetch(s.url,{method:\"HEAD\",signal:AbortSignal.timeout(5000)});
+    return{...s,status:r.ok||r.status<400?\"up\":\"down\",ping:Date.now()-t}; }catch(e){
+    if(e.name===\"AbortError\"||e.name===\"TimeoutError\") return{...s,status:\"down\",ping:null};
+    return{...s,status:\"up\",ping:Date.now()-t}; } }));\n  renderServices(results);\n});
     return{...s,status:\"up\",ping:Date.now()-t}\n      } catch(e) { if(e.name===\"TimeoutError\"||e.name===\"AbortError\")
     return{...s,status:\"down\",ping:null}; return{...s,status:\"up\",ping:Date.now()-t};;
     }catch{ return{...s,status:\"down\",ping:null}; } }));\n  renderServices(results);\n}\nasync
