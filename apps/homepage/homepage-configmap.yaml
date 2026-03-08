@@ -157,6 +157,39 @@ data:
     }\n}\nfunction refresh(){ checkServices(); fetchStats(); fetchErrors(); document.getElementById(\"last-refresh\").textContent=\"LAST
     REFRESH: \"+new Date().toLocaleTimeString(\"en-GB\",{hour12:false}); }\nrefresh();
     setInterval(refresh,30000);\n</script>\n</body>\n</html>"
+  robots.txt: |
+    User-agent: *
+    Disallow: /
+
+    User-agent: GPTBot
+    Disallow: /
+
+    User-agent: ChatGPT-User
+    Disallow: /
+
+    User-agent: Google-Extended
+    Disallow: /
+
+    User-agent: anthropic-ai
+    Disallow: /
+
+    User-agent: Claude-Web
+    Disallow: /
+
+    User-agent: cohere-ai
+    Disallow: /
+
+    User-agent: PerplexityBot
+    Disallow: /
+
+    User-agent: Amazonbot
+    Disallow: /
+
+    User-agent: Meta-ExternalAgent
+    Disallow: /
+
+    User-agent: Bytespider
+    Disallow: /
 kind: ConfigMap
 metadata:
   creationTimestamp: null
