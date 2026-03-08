@@ -27,6 +27,20 @@ spec:
           volumeMounts:
             - name: html
               mountPath: /usr/share/nginx/html
+        - name: sidecar
+          image: localhost:32000/th3borg/homepage-sidecar:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PROMETHEUS_URL
+              value: "http://kube-prometheus-stack-prometheus.monitoring:9090"
+            - name: GLITCHTIP_URL
+              value: "http://glitchtip-web.glitchtip:8000"
+            - name: GLITCHTIP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-secrets
+                  key: GLITCHTIP_TOKEN
       volumes:
         - name: html
           configMap:
