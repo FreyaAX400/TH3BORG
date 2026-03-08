@@ -21,8 +21,8 @@ spec:
             enabled: true
             ingressClassName: nginx
             hosts:
-              - borgling-1.tail20def8.ts.net
-            path: /grafana
+              - grafana.th3borg.org
+            path: /
             pathType: Prefix
           grafana.ini:
             server:
@@ -35,7 +35,7 @@ spec:
         prometheus:
           prometheusSpec:
             routePrefix: /prometheus
-            externalUrl: "https://borgling-1.tail20def8.ts.net:8443/prometheus"
+            externalUrl: "https://prometheus.th3borg.org"
             storageSpec:
               volumeClaimTemplate:
                 spec:
@@ -48,7 +48,7 @@ spec:
             enabled: true
             ingressClassName: nginx
             hosts:
-              - borgling-1.tail20def8.ts.net
+              - prometheus.th3borg.org
             paths:
               - /prometheus
             pathType: Prefix
