@@ -2,8 +2,6 @@ import asyncio
 import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Optional
 import os
 
 app = FastAPI()
@@ -16,17 +14,17 @@ app.add_middleware(
 )
 
 SERVICES = [
-    {"name": "VAULTWARDEN", "url": "https://vaultwarden.th3borg.org"},
-    {"name": "BOOKSTACK",   "url": "https://bookstack.th3borg.org"},
-    {"name": "GRAFANA",     "url": "https://grafana.th3borg.org"},
-    {"name": "GLITCHTIP",   "url": "https://glitchtip.th3borg.org"},
-    {"name": "ARGOCD",      "url": "https://argocd.th3borg.org"},
-    {"name": "UPTIME KUMA", "url": "https://uptime.th3borg.org"},
-    {"name": "LIVESYNC",    "url": "https://livesync.th3borg.org"},
+    {"name": "VAULTWARDEN", "url": "https://vaultwarden.th3borg.org", "internal": "http://vaultwarden.vaultwarden:80"},
+    {"name": "BOOKSTACK",   "url": "https://bookstack.th3borg.org",   "internal": "http://bookstack.bookstack:80"},
+    {"name": "GRAFANA",     "url": "https://grafana.th3borg.org",     "internal": "http://kube-prometheus-stack-grafana.monitoring:80"},
+    {"name": "GLITCHTIP",   "url": "https://glitchtip.th3borg.org",   "internal": "http://glitchtip-web.glitchtip:8000"},
+    {"name": "ARGOCD",      "url": "https://argocd.th3borg.org",      "internal": "http://argocd-server.argocd:80"},
+    {"name": "UPTIME KUMA", "url": "https://uptime.th3borg.org",      "internal": "http://uptime-kuma.monitoring:3001"},
+    {"name": "LIVESYNC",    "url": "https://livesync.th3borg.org",    "internal": "http://livesync.livesync:5984"},
 ]
 
-PROMETHEUS_URL = os.getenv("PROMETHEUS_URL", "http://kube-prometheus-stack-prometheus.monitoring:9090")
-GLITCHTIP_URL  = os.getenv("GLITCHTIP_URL", "http://glitchtip-web.glitchtip:8000")
+PROMETHEUS_URL  = os.getenv("PROMETHEUS_URL",  "http://kube-prometheus-stack-prometheus.monitoring:9090")
+GLITCHTIP_URL   = os.getenv("GLITCHTIP_URL",   "http://glitchtip-web.glitchtip:8000")
 GLITCHTIP_TOKEN = os.getenv("GLITCHTIP_TOKEN", "")
 
 
@@ -34,20 +32,20 @@ async def check_service(client: httpx.AsyncClient, svc: dict) -> dict:
     import time
     start = time.monotonic()
     try:
-        r = await client.head(svc["url"], timeout=5.0, follow_redirects=True)
+        r = await client.get(svc["internal"], timeout=5.0, follow_redirects=True)
         ping = int((time.monotonic() - start) * 1000)
         status = "up" if r.status_code < 500 else "down"
         return {**svc, "status": status, "ping": ping, "code": r.status_code}
-    except Exception:
-        return {**svc, "status": "down", "ping": None, "code": None}
+    except Exception as e:
+        return {**svc, "status": "down", "ping": None, "code": None, "error": str(e)}
 
 
 async def fetch_prometheus() -> dict:
     queries = {
-        "cpu": 'query?query=100-(avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))*100)',
+        "cpu":      'query?query=100-(avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))*100)',
         "mem_total": "query?query=node_memory_MemTotal_bytes",
         "mem_avail": "query?query=node_memory_MemAvailable_bytes",
-        "pods": 'query?query=count(kube_pod_info{namespace!="kube-system"})',
+        "pods":     'query?query=count(kube_pod_info{namespace!="kube-system"})',
     }
     results = {}
     async with httpx.AsyncClient() as client:
@@ -76,10 +74,10 @@ async def fetch_glitchtip_issues() -> list:
                 issues = r.json()
                 return [
                     {
-                        "title": i.get("title") or i.get("culprit", "Unknown"),
+                        "title":   i.get("title") or i.get("culprit", "Unknown"),
                         "project": i.get("project", {}).get("name", "unknown"),
-                        "count": i.get("count", 0),
-                        "level": i.get("level", "error"),
+                        "count":   i.get("count", 0),
+                        "level":   i.get("level", "error"),
                         "lastSeen": i.get("lastSeen", ""),
                     }
                     for i in issues
@@ -91,7 +89,7 @@ async def fetch_glitchtip_issues() -> list:
 
 @app.get("/api/status")
 async def status():
-    async with httpx.AsyncClient(verify=False) as client:
+    async with httpx.AsyncClient() as client:
         service_results = await asyncio.gather(*[check_service(client, s) for s in SERVICES])
 
     prom = await fetch_prometheus()
@@ -106,11 +104,11 @@ async def status():
     return {
         "services": list(service_results),
         "cluster": {
-            "cpu_pct": round(prom["cpu"], 1) if prom.get("cpu") else None,
+            "cpu_pct":      round(prom["cpu"], 1) if prom.get("cpu") else None,
             "mem_total_gb": round(mem_total / 1073741824, 1) if mem_total else None,
             "mem_avail_gb": round(mem_avail / 1073741824, 1) if mem_avail else None,
             "mem_used_pct": mem_used_pct,
-            "pods": int(prom["pods"]) if prom.get("pods") else None,
+            "pods":         int(prom["pods"]) if prom.get("pods") else None,
         },
         "errors": issues,
     }
