@@ -1,7 +1,6 @@
 import asyncio
 import httpx
 import os
-import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,10 +17,8 @@ PROMETHEUS_URL  = os.getenv("PROMETHEUS_URL",  "http://kube-prometheus-stack-pro
 GLITCHTIP_URL   = os.getenv("GLITCHTIP_URL",   "http://glitchtip-web.glitchtip:8000")
 GLITCHTIP_TOKEN = os.getenv("GLITCHTIP_TOKEN", "")
 
-# Namespaces to skip for auto-discovery
 SKIP_NAMESPACES = {"kube-system", "nginx-ingress", "registry", "homepage"}
 
-# Display name overrides
 NAME_OVERRIDES = {
     "vaultwarden.th3borg.org": "VAULTWARDEN",
     "bookstack.th3borg.org":   "BOOKSTACK",
@@ -35,7 +32,7 @@ NAME_OVERRIDES = {
     "th3borg.org":             "HOMEPAGE",
 }
 
-K8S_HOST = "https://kubernetes.default.svc"
+K8S_HOST      = "https://kubernetes.default.svc"
 SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 SA_CA_PATH    = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 
@@ -61,9 +58,8 @@ async def get_ingresses() -> list:
             )
             if r.status_code != 200:
                 return []
-            data = r.json()
             services = []
-            for item in data.get("items", []):
+            for item in r.json().get("items", []):
                 ns = item["metadata"]["namespace"]
                 if ns in SKIP_NAMESPACES:
                     continue
@@ -71,7 +67,6 @@ async def get_ingresses() -> list:
                     host = rule.get("host", "")
                     if not host or not host.endswith("th3borg.org"):
                         continue
-                    # Get internal service from ingress backend
                     paths = rule.get("http", {}).get("paths", [])
                     if not paths:
                         continue
@@ -80,12 +75,7 @@ async def get_ingresses() -> list:
                     svc_port = backend.get("port", {}).get("number", 80)
                     internal = f"http://{svc_name}.{ns}:{svc_port}"
                     display = NAME_OVERRIDES.get(host, host.split(".")[0].upper())
-                    services.append({
-                        "name": display,
-                        "url": f"https://{host}",
-                        "internal": internal,
-                    })
-            # Sort by display name
+                    services.append({"name": display, "url": f"https://{host}", "internal": internal})
             services.sort(key=lambda x: x["name"])
             return services
     except Exception as e:
@@ -105,25 +95,121 @@ async def check_service(client: httpx.AsyncClient, svc: dict) -> dict:
         return {**svc, "status": "down", "ping": None, "code": None, "error": str(e)}
 
 
-async def fetch_prometheus() -> dict:
-    queries = {
-        "cpu":       'query?query=100-(avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))*100)',
-        "mem_total": "query?query=node_memory_MemTotal_bytes",
-        "mem_avail": "query?query=node_memory_MemAvailable_bytes",
-        "pods":      'query?query=count(kube_pod_info{namespace!="kube-system"})',
-        "uptime":    "query?query=node_time_seconds-node_boot_time_seconds",
-    }
-    results = {}
+async def prom_query(client: httpx.AsyncClient, query: str):
+    try:
+        r = await client.get(
+            f"{PROMETHEUS_URL}/api/v1/query",
+            params={"query": query},
+            timeout=3.0,
+        )
+        data = r.json()
+        return data["data"]["result"]
+    except Exception:
+        return []
+
+
+async def fetch_cluster_stats() -> dict:
     async with httpx.AsyncClient() as client:
-        for key, q in queries.items():
+        # Per-node queries
+        results = await asyncio.gather(
+            prom_query(client, '100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)'),
+            prom_query(client, 'node_memory_MemTotal_bytes'),
+            prom_query(client, 'node_memory_MemAvailable_bytes'),
+            prom_query(client, 'node_filesystem_size_bytes{mountpoint="/"}'),
+            prom_query(client, 'node_filesystem_avail_bytes{mountpoint="/"}'),
+            prom_query(client, 'count by (node) (kube_pod_info)'),
+            prom_query(client, 'node_time_seconds - node_boot_time_seconds'),
+            prom_query(client, 'kube_node_info'),
+        )
+
+    cpu_res, mem_total_res, mem_avail_res, disk_total_res, disk_avail_res, pods_res, uptime_res, node_info_res = results
+
+    # Build node lookup from kube_node_info (maps instance IP to node name)
+    instance_to_node = {}
+    for r in node_info_res:
+        node = r["metric"].get("node", "")
+        # Also index by internal_ip if available
+        internal_ip = r["metric"].get("internal_ip", "")
+        if internal_ip:
+            instance_to_node[internal_ip] = node
+
+    def get_node_name(instance: str) -> str:
+        ip = instance.split(":")[0]
+        return instance_to_node.get(ip, ip)
+
+    def build_node_map(res, value_transform=float):
+        m = {}
+        for r in res:
+            instance = r["metric"].get("instance", "")
+            node = get_node_name(instance)
             try:
-                r = await client.get(f"{PROMETHEUS_URL}/api/v1/{q}", timeout=3.0)
-                data = r.json()
-                val = data["data"]["result"][0]["value"][1]
-                results[key] = float(val)
+                m[node] = value_transform(r["value"][1])
             except Exception:
-                results[key] = None
-    return results
+                pass
+        return m
+
+    cpu_map       = build_node_map(cpu_res, lambda v: round(float(v), 1))
+    mem_total_map = build_node_map(mem_total_res)
+    mem_avail_map = build_node_map(mem_avail_res)
+    disk_total_map = build_node_map(disk_total_res)
+    disk_avail_map = build_node_map(disk_avail_res)
+    uptime_map    = build_node_map(uptime_res, lambda v: int(float(v)))
+
+    pods_map = {}
+    for r in pods_res:
+        node = r["metric"].get("node", "")
+        try:
+            pods_map[node] = int(r["value"][1])
+        except Exception:
+            pass
+
+    # Build per-node stats
+    all_nodes = set(list(cpu_map.keys()) + list(mem_total_map.keys()))
+    nodes = []
+    for node in sorted(all_nodes):
+        mt = mem_total_map.get(node)
+        ma = mem_avail_map.get(node)
+        dt = disk_total_map.get(node)
+        da = disk_avail_map.get(node)
+        mem_used_pct = round(((mt - ma) / mt) * 100, 1) if mt and ma else None
+        disk_used_pct = round(((dt - da) / dt) * 100, 1) if dt and da else None
+        nodes.append({
+            "name":          node,
+            "cpu_pct":       cpu_map.get(node),
+            "mem_total_gb":  round(mt / 1073741824, 1) if mt else None,
+            "mem_avail_gb":  round(ma / 1073741824, 1) if ma else None,
+            "mem_used_pct":  mem_used_pct,
+            "disk_total_gb": round(dt / 1073741824, 1) if dt else None,
+            "disk_avail_gb": round(da / 1073741824, 1) if da else None,
+            "disk_used_pct": disk_used_pct,
+            "pods":          pods_map.get(node),
+            "uptime_seconds": uptime_map.get(node),
+        })
+
+    # Cluster totals
+    total_mem = sum(v for v in mem_total_map.values() if v)
+    avail_mem = sum(v for v in mem_avail_map.values() if v)
+    total_disk = sum(v for v in disk_total_map.values() if v)
+    avail_disk = sum(v for v in disk_avail_map.values() if v)
+    total_pods = sum(pods_map.values())
+    avg_cpu = round(sum(cpu_map.values()) / len(cpu_map), 1) if cpu_map else None
+    min_uptime = min(uptime_map.values()) if uptime_map else None
+
+    return {
+        "nodes": nodes,
+        "cluster": {
+            "cpu_pct":        avg_cpu,
+            "mem_total_gb":   round(total_mem / 1073741824, 1) if total_mem else None,
+            "mem_avail_gb":   round(avail_mem / 1073741824, 1) if avail_mem else None,
+            "mem_used_pct":   round(((total_mem - avail_mem) / total_mem) * 100, 1) if total_mem and avail_mem else None,
+            "disk_total_gb":  round(total_disk / 1073741824, 1) if total_disk else None,
+            "disk_avail_gb":  round(avail_disk / 1073741824, 1) if avail_disk else None,
+            "disk_used_pct":  round(((total_disk - avail_disk) / total_disk) * 100, 1) if total_disk and avail_disk else None,
+            "pods":           total_pods,
+            "node_count":     len(all_nodes),
+            "uptime_seconds": min_uptime,
+        }
+    }
 
 
 async def fetch_glitchtip_issues() -> list:
@@ -158,26 +244,14 @@ async def status():
     async with httpx.AsyncClient() as client:
         service_results = await asyncio.gather(*[check_service(client, s) for s in services])
 
-    prom = await fetch_prometheus()
+    stats = await fetch_cluster_stats()
     issues = await fetch_glitchtip_issues()
-
-    mem_total = prom.get("mem_total")
-    mem_avail = prom.get("mem_avail")
-    mem_used_pct = None
-    if mem_total and mem_avail:
-        mem_used_pct = round(((mem_total - mem_avail) / mem_total) * 100, 1)
 
     return {
         "services": list(service_results),
-        "cluster": {
-            "cpu_pct":      round(prom["cpu"], 1) if prom.get("cpu") else None,
-            "mem_total_gb": round(mem_total / 1073741824, 1) if mem_total else None,
-            "mem_avail_gb": round(mem_avail / 1073741824, 1) if mem_avail else None,
-            "mem_used_pct": mem_used_pct,
-            "pods":         int(prom["pods"]) if prom.get("pods") else None,
-            "uptime_seconds": int(prom["uptime"]) if prom.get("uptime") else None,
-        },
-        "errors": issues,
+        "nodes":    stats["nodes"],
+        "cluster":  stats["cluster"],
+        "errors":   issues,
     }
 
 

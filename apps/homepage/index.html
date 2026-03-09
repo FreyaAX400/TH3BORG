@@ -47,7 +47,18 @@
   .stat-fill::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 2px; background: #fff; opacity: 0.8; }
   .stat-fill.warning { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
   .stat-fill.critical { background: var(--red); box-shadow: 0 0 6px var(--red); }
-  .node-info { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--green-dark); font-size: 0.8rem; color: var(--green-dim); display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+  .node-card {
+  border: 1px solid var(--green-dim);
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.node-title {
+  color: var(--green-bright);
+  font-size: 0.85em;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.node-info { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--green-dark); font-size: 0.8rem; color: var(--green-dim); display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
   .node-info span { color: var(--green); }
   .errors { grid-column: 2 / 3; grid-row: 2 / 3; }
   .error-list { display: flex; flex-direction: column; gap: 0.5rem; max-height: 300px; overflow-y: auto; }
@@ -108,6 +119,23 @@ async function refresh() {
     else { el.innerHTML=data.errors.map(i=>`<div class="error-item ${i.level==="warning"?"warning":""}"><div class="error-title">${i.title}</div><div class="error-meta">${i.project} // ${i.count} occurrences // ${new Date(i.lastSeen).toLocaleString()}</div></div>`).join(""); }
 
     if(data.cluster.uptime_seconds) document.getElementById("page-uptime").textContent=fmtUptime(data.cluster.uptime_seconds);
+    // Nodes
+    if(data.nodes && data.nodes.length) {
+      const nodesHtml = data.nodes.map(n => {
+        const cpuCls = n.cpu_pct>80?"critical":n.cpu_pct>60?"warning":"";
+        const memCls = n.mem_used_pct>85?"critical":n.mem_used_pct>70?"warning":"";
+        const diskCls = n.disk_used_pct>85?"critical":n.disk_used_pct>70?"warning":"";
+        return `<div class="node-card">
+          <div class="node-title">> ${n.name.toUpperCase()} // ${n.pods} PODS // UP ${fmtUptime(n.uptime_seconds)}</div>
+          <div class="stat-row"><div class="stat-label"><span>CPU</span><span>${n.cpu_pct??"??"}%</span></div><div class="stat-bar"><div class="stat-fill ${cpuCls}" style="width:${n.cpu_pct??0}%"></div></div></div>
+          <div class="stat-row"><div class="stat-label"><span>MEM</span><span>${n.mem_used_pct??"??"}% (${n.mem_avail_gb??"??"}GB free of ${n.mem_total_gb??"??"}GB)</span></div><div class="stat-bar"><div class="stat-fill ${memCls}" style="width:${n.mem_used_pct??0}%"></div></div></div>
+          <div class="stat-row"><div class="stat-label"><span>DISK</span><span>${n.disk_used_pct??"??"}% (${n.disk_avail_gb??"??"}GB free of ${n.disk_total_gb??"??"}GB)</span></div><div class="stat-bar"><div class="stat-fill ${diskCls}" style="width:${n.disk_used_pct??0}%"></div></div></div>
+        </div>`;
+      }).join("");
+      const nodesEl = document.getElementById("nodes-content");
+      if(nodesEl) nodesEl.innerHTML = nodesHtml;
+    }
+
     document.getElementById("last-refresh").textContent="LAST REFRESH: "+new Date().toLocaleTimeString("en-GB",{hour12:false});
   } catch(e) {
     console.error("Status fetch failed:", e);
