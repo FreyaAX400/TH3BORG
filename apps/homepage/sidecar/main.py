@@ -21,6 +21,7 @@ SERVICES = [
     {"name": "ARGOCD",      "url": "https://argocd.th3borg.org",      "internal": "http://argocd-server.argocd:80"},
     {"name": "UPTIME KUMA", "url": "https://uptime.th3borg.org",      "internal": "http://uptime-kuma.monitoring:3001"},
     {"name": "LIVESYNC",    "url": "https://livesync.th3borg.org",    "internal": "http://livesync.livesync:5984"},
+    {"name": "KAVITA",      "url": "https://kavita.th3borg.org",      "internal": "http://kavita.kavita:5000"},
 ]
 
 PROMETHEUS_URL  = os.getenv("PROMETHEUS_URL",  "http://kube-prometheus-stack-prometheus.monitoring:9090/prometheus")
