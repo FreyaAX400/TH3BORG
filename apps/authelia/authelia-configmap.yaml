@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authelia-config
+  namespace: authelia
+data:
+  configuration.yml: |
+    theme: dark
+    default_redirection_url: https://th3borg.org
+
+    server:
+      host: 0.0.0.0
+      port: 9091
+
+    log:
+      level: info
+
+    totp:
+      disable: true
+
+    webauthn:
+      disable: false
+      timeout: 60s
+      user_verification: preferred
+
+    authentication_backend:
+      ldap:
+        implementation: custom
+        url: ldap://lldap.lldap:3890
+        timeout: 5s
+        start_tls: false
+        base_dn: dc=th3borg,dc=org
+        username_attribute: uid
+        additional_users_dn: ou=people
+        users_filter: (&({username_attribute}={input})(objectClass=person))
+        additional_groups_dn: ou=groups
+        groups_filter: (member={dn})
+        group_name_attribute: cn
+        mail_attribute: mail
+        display_name_attribute: displayName
+        user: uid=admin,ou=people,dc=th3borg,dc=org
+        password: ${LLDAP_PASSWORD}
+
+    access_control:
+      default_policy: deny
+      rules:
+        - domain: th3borg.org
+          policy: bypass
+        - domain: "*.th3borg.org"
+          resources:
+            - "^/dashboard.*"
+          policy: two_factor
+        - domain: authelia.th3borg.org
+          policy: bypass
+        - domain: lldap.th3borg.org
+          policy: two_factor
+        - domain: "*.th3borg.org"
+          policy: bypass
+
+    session:
+      name: authelia_session
+      domain: th3borg.org
+      expiration: 12h
+      inactivity: 2h
+      remember_me_duration: 7d
+      redis:
+        host: authelia-valkey.authelia
+        port: 6379
+
+    regulation:
+      max_retries: 3
+      find_time: 2m
+      ban_time: 10m
+
+    storage:
+      encryption_key: ${STORAGE_ENCRYPTION_KEY}
+      postgres:
+        host: authelia-postgres.authelia
+        port: 5432
+        database: authelia
+        username: authelia
+        password: ${POSTGRES_PASSWORD}
+
+    notifier:
+      disable_startup_check: true
+      filesystem:
+        filename: /config/notification.txt
