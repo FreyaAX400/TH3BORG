@@ -13,6 +13,7 @@ spec:
       labels:
         app: homepage
     spec:
+      serviceAccountName: homepage-sidecar
       nodeSelector:
         kubernetes.io/hostname: borgling-1
       tolerations:

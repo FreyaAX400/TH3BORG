@@ -1,8 +1,9 @@
 import asyncio
 import httpx
+import os
+import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 
 app = FastAPI()
 
@@ -13,20 +14,83 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-SERVICES = [
-    {"name": "VAULTWARDEN", "url": "https://vaultwarden.th3borg.org", "internal": "http://vaultwarden.vaultwarden:80"},
-    {"name": "BOOKSTACK",   "url": "https://bookstack.th3borg.org",   "internal": "http://bookstack.bookstack:80"},
-    {"name": "GRAFANA",     "url": "https://grafana.th3borg.org",     "internal": "http://kube-prometheus-stack-grafana.monitoring:80"},
-    {"name": "GLITCHTIP",   "url": "https://glitchtip.th3borg.org",   "internal": "http://glitchtip-web.glitchtip:8000"},
-    {"name": "ARGOCD",      "url": "https://argocd.th3borg.org",      "internal": "http://argocd-server.argocd:80"},
-    {"name": "UPTIME KUMA", "url": "https://uptime.th3borg.org",      "internal": "http://uptime-kuma.monitoring:3001"},
-    {"name": "LIVESYNC",    "url": "https://livesync.th3borg.org",    "internal": "http://livesync.livesync:5984"},
-    {"name": "KAVITA",      "url": "https://kavita.th3borg.org",      "internal": "http://kavita.kavita:5000"},
-]
-
 PROMETHEUS_URL  = os.getenv("PROMETHEUS_URL",  "http://kube-prometheus-stack-prometheus.monitoring:9090/prometheus")
 GLITCHTIP_URL   = os.getenv("GLITCHTIP_URL",   "http://glitchtip-web.glitchtip:8000")
 GLITCHTIP_TOKEN = os.getenv("GLITCHTIP_TOKEN", "")
+
+# Namespaces to skip for auto-discovery
+SKIP_NAMESPACES = {"kube-system", "nginx-ingress", "registry", "homepage"}
+
+# Display name overrides
+NAME_OVERRIDES = {
+    "vaultwarden.th3borg.org": "VAULTWARDEN",
+    "bookstack.th3borg.org":   "BOOKSTACK",
+    "grafana.th3borg.org":     "GRAFANA",
+    "glitchtip.th3borg.org":   "GLITCHTIP",
+    "argocd.th3borg.org":      "ARGOCD",
+    "uptime.th3borg.org":      "UPTIME KUMA",
+    "livesync.th3borg.org":    "LIVESYNC",
+    "kavita.th3borg.org":      "KAVITA",
+    "prometheus.th3borg.org":  "PROMETHEUS",
+    "th3borg.org":             "HOMEPAGE",
+}
+
+K8S_HOST = "https://kubernetes.default.svc"
+SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+SA_CA_PATH    = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+
+
+def k8s_token():
+    try:
+        with open(SA_TOKEN_PATH) as f:
+            return f.read().strip()
+    except Exception:
+        return None
+
+
+async def get_ingresses() -> list:
+    token = k8s_token()
+    if not token:
+        return []
+    try:
+        async with httpx.AsyncClient(verify=SA_CA_PATH) as client:
+            r = await client.get(
+                f"{K8S_HOST}/apis/networking.k8s.io/v1/ingresses",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=5.0,
+            )
+            if r.status_code != 200:
+                return []
+            data = r.json()
+            services = []
+            for item in data.get("items", []):
+                ns = item["metadata"]["namespace"]
+                if ns in SKIP_NAMESPACES:
+                    continue
+                for rule in item.get("spec", {}).get("rules", []):
+                    host = rule.get("host", "")
+                    if not host or not host.endswith("th3borg.org"):
+                        continue
+                    # Get internal service from ingress backend
+                    paths = rule.get("http", {}).get("paths", [])
+                    if not paths:
+                        continue
+                    backend = paths[0].get("backend", {}).get("service", {})
+                    svc_name = backend.get("name", "")
+                    svc_port = backend.get("port", {}).get("number", 80)
+                    internal = f"http://{svc_name}.{ns}:{svc_port}"
+                    display = NAME_OVERRIDES.get(host, host.split(".")[0].upper())
+                    services.append({
+                        "name": display,
+                        "url": f"https://{host}",
+                        "internal": internal,
+                    })
+            # Sort by display name
+            services.sort(key=lambda x: x["name"])
+            return services
+    except Exception as e:
+        print(f"k8s ingress discovery error: {e}")
+        return []
 
 
 async def check_service(client: httpx.AsyncClient, svc: dict) -> dict:
@@ -43,10 +107,10 @@ async def check_service(client: httpx.AsyncClient, svc: dict) -> dict:
 
 async def fetch_prometheus() -> dict:
     queries = {
-        "cpu":      'query?query=100-(avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))*100)',
+        "cpu":       'query?query=100-(avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))*100)',
         "mem_total": "query?query=node_memory_MemTotal_bytes",
         "mem_avail": "query?query=node_memory_MemAvailable_bytes",
-        "pods":     'query?query=count(kube_pod_info{namespace!="kube-system"})',
+        "pods":      'query?query=count(kube_pod_info{namespace!="kube-system"})',
     }
     results = {}
     async with httpx.AsyncClient() as client:
@@ -72,16 +136,15 @@ async def fetch_glitchtip_issues() -> list:
                 timeout=5.0,
             )
             if r.status_code == 200:
-                issues = r.json()
                 return [
                     {
-                        "title":   i.get("title") or i.get("culprit", "Unknown"),
-                        "project": i.get("project", {}).get("name", "unknown"),
-                        "count":   i.get("count", 0),
-                        "level":   i.get("level", "error"),
+                        "title":    i.get("title") or i.get("culprit", "Unknown"),
+                        "project":  i.get("project", {}).get("name", "unknown"),
+                        "count":    i.get("count", 0),
+                        "level":    i.get("level", "error"),
                         "lastSeen": i.get("lastSeen", ""),
                     }
-                    for i in issues
+                    for i in r.json()
                 ]
     except Exception:
         pass
@@ -90,8 +153,9 @@ async def fetch_glitchtip_issues() -> list:
 
 @app.get("/api/status")
 async def status():
+    services = await get_ingresses()
     async with httpx.AsyncClient() as client:
-        service_results = await asyncio.gather(*[check_service(client, s) for s in SERVICES])
+        service_results = await asyncio.gather(*[check_service(client, s) for s in services])
 
     prom = await fetch_prometheus()
     issues = await fetch_glitchtip_issues()
