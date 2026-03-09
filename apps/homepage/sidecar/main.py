@@ -23,7 +23,7 @@ SERVICES = [
     {"name": "LIVESYNC",    "url": "https://livesync.th3borg.org",    "internal": "http://livesync.livesync:5984"},
 ]
 
-PROMETHEUS_URL  = os.getenv("PROMETHEUS_URL",  "http://kube-prometheus-stack-prometheus.monitoring:9090")
+PROMETHEUS_URL  = os.getenv("PROMETHEUS_URL",  "http://kube-prometheus-stack-prometheus.monitoring:9090/prometheus")
 GLITCHTIP_URL   = os.getenv("GLITCHTIP_URL",   "http://glitchtip-web.glitchtip:8000")
 GLITCHTIP_TOKEN = os.getenv("GLITCHTIP_TOKEN", "")
 

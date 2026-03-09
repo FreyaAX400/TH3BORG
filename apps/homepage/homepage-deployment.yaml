@@ -35,7 +35,7 @@ spec:
             - containerPort: 8000
           env:
             - name: PROMETHEUS_URL
-              value: "http://kube-prometheus-stack-prometheus.monitoring:9090"
+              value: "http://kube-prometheus-stack-prometheus.monitoring:9090/prometheus"
             - name: GLITCHTIP_URL
               value: "http://glitchtip-web.glitchtip:8000"
             - name: GLITCHTIP_TOKEN
