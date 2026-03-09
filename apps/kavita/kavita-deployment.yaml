@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kavita
+  namespace: kavita
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kavita
+  template:
+    metadata:
+      labels:
+        app: kavita
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: borgling-2
+      containers:
+        - name: kavita
+          image: jvmilazz0/kavita:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: TZ
+              value: "Europe/Stockholm"
+          volumeMounts:
+            - name: data
+              mountPath: /kavita/config
+            - name: library
+              mountPath: /library
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: kavita-data
+        - name: library
+          persistentVolumeClaim:
+            claimName: kavita-library

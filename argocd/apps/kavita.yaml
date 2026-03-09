@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kavita
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/FreyaAX400/TH3BORG.git
+    targetRevision: HEAD
+    path: apps/kavita
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kavita
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
