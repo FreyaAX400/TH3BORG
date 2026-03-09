@@ -111,6 +111,7 @@ async def fetch_prometheus() -> dict:
         "mem_total": "query?query=node_memory_MemTotal_bytes",
         "mem_avail": "query?query=node_memory_MemAvailable_bytes",
         "pods":      'query?query=count(kube_pod_info{namespace!="kube-system"})',
+        "uptime":    "query?query=node_time_seconds-node_boot_time_seconds",
     }
     results = {}
     async with httpx.AsyncClient() as client:
@@ -174,6 +175,7 @@ async def status():
             "mem_avail_gb": round(mem_avail / 1073741824, 1) if mem_avail else None,
             "mem_used_pct": mem_used_pct,
             "pods":         int(prom["pods"]) if prom.get("pods") else None,
+            "uptime_seconds": int(prom["uptime"]) if prom.get("uptime") else None,
         },
         "errors": issues,
     }

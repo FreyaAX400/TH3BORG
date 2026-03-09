@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kavita-smb
+  namespace: kavita
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kavita-smb
+  template:
+    metadata:
+      labels:
+        app: kavita-smb
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: borgling-2
+      containers:
+        - name: samba
+          image: dperson/samba:latest
+          args:
+            - "-u"
+            - "borg;$(SMB_PASSWORD)"
+            - "-s"
+            - "library;/library;yes;no;no;borg"
+            - "-p"
+          ports:
+            - containerPort: 445
+              name: smb
+          env:
+            - name: SMB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kavita-smb-secret
+                  key: SMB_PASSWORD
+          volumeMounts:
+            - name: library
+              mountPath: /library
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: library
+          persistentVolumeClaim:
+            claimName: kavita-library

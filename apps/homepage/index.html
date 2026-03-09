@@ -88,8 +88,7 @@
 <script>
 function updateClock() { document.getElementById("sys-time").textContent = new Date().toLocaleTimeString("en-GB",{hour12:false}); }
 setInterval(updateClock,1000); updateClock();
-const startTime = Date.now();
-setInterval(()=>{ const s=Math.floor((Date.now()-startTime)/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; document.getElementById("page-uptime").textContent=h>0?h+"h "+m+"m "+sec+"s":m>0?m+"m "+sec+"s":sec+"s"; },1000);
+function fmtUptime(s){ const d=Math.floor(s/86400),h=Math.floor((s%86400)/3600),m=Math.floor((s%3600)/60),sec=s%60; return d>0?d+"d "+h+"h "+m+"m":h>0?h+"h "+m+"m "+sec+"s":m>0?m+"m "+sec+"s":sec+"s"; }
 
 async function refresh() {
   try {
@@ -108,6 +107,7 @@ async function refresh() {
     if(!data.errors||!data.errors.length){ el.innerHTML='<div class="no-errors">NO RECENT ERRORS DETECTED</div>'; }
     else { el.innerHTML=data.errors.map(i=>`<div class="error-item ${i.level==="warning"?"warning":""}"><div class="error-title">${i.title}</div><div class="error-meta">${i.project} // ${i.count} occurrences // ${new Date(i.lastSeen).toLocaleString()}</div></div>`).join(""); }
 
+    if(data.cluster.uptime_seconds) document.getElementById("page-uptime").textContent=fmtUptime(data.cluster.uptime_seconds);
     document.getElementById("last-refresh").textContent="LAST REFRESH: "+new Date().toLocaleTimeString("en-GB",{hour12:false});
   } catch(e) {
     console.error("Status fetch failed:", e);
