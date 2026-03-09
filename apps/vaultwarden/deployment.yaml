@@ -20,12 +20,12 @@ spec:
         - containerPort: 80
         env:
         - name: DOMAIN
-          value: "https://borgling-1.tail20def8.ts.net:8443"
+          value: "https://vaultwarden.th3borg.org"
         - name: ADMIN_TOKEN
           valueFrom:
             secretKeyRef:
               name: vaultwarden-admin-token
-              key: token
+              key: ADMIN_TOKEN
         - name: SIGNUPS_ALLOWED
           value: "true"
         - name: ROCKET_PORT
