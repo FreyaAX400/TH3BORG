@@ -49,21 +49,32 @@ data:
         password: ${AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD}
 
     access_control:
-      default_policy: two_factor
+      default_policy: deny
       rules:
         - domain: th3borg.org
           policy: bypass
         - domain: authelia.th3borg.org
           policy: bypass
+        - domain: control.th3borg.org
+          policy: two_factor
+          subject:
+            - group:th3borg_admins
+        - domain: apps.th3borg.org
+          policy: two_factor
+          subject:
+            - group:th3borg_admins
+        - domain: apps.th3borg.org
+          policy: one_factor
+          subject:
+            - group:th3borg_users
         - domain: lldap.th3borg.org
           policy: two_factor
-        - domain: "*.th3borg.org"
-          resources:
-            - "^/dashboard.*"
+          subject:
+            - group:th3borg_admins
+        - domain: prometheus.th3borg.org
           policy: two_factor
-        - domain: "*.th3borg.org"
-          policy: bypass
-
+          subject:
+            - group:th3borg_admins
     session:
       secret: ${AUTHELIA_SESSION_SECRET}
       cookies:
