@@ -22,7 +22,8 @@ data:
     webauthn:
       disable: false
       timeout: 60s
-      user_verification: preferred
+      selection_criteria:
+        user_verification: preferred
 
     authentication_backend:
       ldap:
