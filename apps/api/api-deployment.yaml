@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      serviceAccountName: api
+      nodeSelector:
+        kubernetes.io/hostname: borgling-1
+      containers:
+        - name: api
+          image: registry.th3borg.org/th3borg-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PROMETHEUS_URL
+              value: "http://kube-prometheus-stack-prometheus.monitoring:9090/prometheus"
+            - name: GLITCHTIP_URL
+              value: "http://glitchtip-web.glitchtip:8000"
+            - name: GLITCHTIP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: api-secrets
+                  key: GLITCHTIP_TOKEN
+            - name: API_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: api-secrets
+                  key: API_KEYS
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 30
