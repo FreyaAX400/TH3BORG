@@ -15,6 +15,12 @@ data:
     log:
       level: info
 
+    ntp:
+      disable_startup_check: true
+
+    ntp:
+      disable_startup_check: true
+
     totp:
       disable: true
 
@@ -26,7 +32,7 @@ data:
     authentication_backend:
       ldap:
         implementation: custom
-        url: ldap://lldap.lldap:3890
+        url: ldap://lldap.lldap.svc.cluster.local:3890
         timeout: 5s
         start_tls: false
         base_dn: dc=th3borg,dc=org
