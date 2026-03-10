@@ -16,13 +16,9 @@ spec:
       serviceAccountName: api
       nodeSelector:
         kubernetes.io/hostname: borgling-1
-      tolerations:
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoSchedule
       containers:
         - name: api
-          image: 100.124.41.14:32000/th3borg-api:latest
+          image: registry.th3borg.org/th3borg-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
