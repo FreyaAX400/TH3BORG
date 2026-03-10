@@ -13,7 +13,7 @@ metadata:
     nginx.org/server-snippets: |
       location = /authelia {
         internal;
-        proxy_pass http://authelia.authelia.svc.cluster.local:9091/api/authz/forward-auth;
+        proxy_pass http://authelia.authelia.svc.cluster.local:9091/api/authz/ext-authz;
         proxy_set_header X-Forwarded-Method $request_method;
         proxy_set_header X-Forwarded-Proto https;
         proxy_set_header X-Forwarded-Host $http_host;
