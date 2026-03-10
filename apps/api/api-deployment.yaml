@@ -16,6 +16,10 @@ spec:
       serviceAccountName: api
       nodeSelector:
         kubernetes.io/hostname: borgling-1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
       containers:
         - name: api
           image: registry.th3borg.org/th3borg-api:latest
