@@ -68,9 +68,7 @@ data:
           subject:
             - group:th3borg_users
         - domain: lldap.th3borg.org
-          policy: two_factor
-          subject:
-            - group:th3borg_admins
+          policy: bypass
         - domain: prometheus.th3borg.org
           policy: two_factor
           subject:
