@@ -21,10 +21,8 @@ data:
 
     webauthn:
       disable: false
+      display_name: TH3BORG
       timeout: 60s
-      relying_party:
-        id: th3borg.org
-        display_name: TH3BORG
       selection_criteria:
         user_verification: preferred
 
