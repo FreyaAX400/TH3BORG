@@ -19,6 +19,7 @@ spec:
         - key: node-role.kubernetes.io/control-plane
           operator: Exists
           effect: NoSchedule
+      enableServiceLinks: false
       containers:
         - name: authelia
           image: authelia/authelia:latest
