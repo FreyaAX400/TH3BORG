@@ -28,7 +28,9 @@ data:
       display_name: TH3BORG
       timeout: 60s
       selection_criteria:
-        user_verification: preferred
+        user_verification: required
+
+    default_2fa_method: webauthn
 
     authentication_backend:
       ldap:
