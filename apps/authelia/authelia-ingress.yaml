@@ -6,6 +6,8 @@ metadata:
   annotations:
     nginx.org/proxy-read-timeout: "360"
     nginx.org/proxy-send-timeout: "360"
+    nginx.org/location-snippets: |
+      proxy_set_header X-Forwarded-Proto https;
 spec:
   ingressClassName: nginx
   rules:
