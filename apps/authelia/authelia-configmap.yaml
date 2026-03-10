@@ -17,7 +17,11 @@ data:
       disable_startup_check: true
 
     totp:
-      disable: true
+      disable: false
+      issuer: th3borg.org
+      algorithm: sha1
+      digits: 6
+      period: 30
 
     webauthn:
       disable: false
