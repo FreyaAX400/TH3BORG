@@ -27,6 +27,8 @@ data:
       disable: false
       display_name: TH3BORG
       timeout: 60s
+      enable_passkey_login: true
+      experimental_allow_credential_authn_via_user_verification: true
       selection_criteria:
         user_verification: required
 
