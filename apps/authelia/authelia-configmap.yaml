@@ -6,7 +6,6 @@ metadata:
 data:
   configuration.yml: |
     theme: dark
-    default_redirection_url: https://th3borg.org
 
     server:
       address: tcp://0.0.0.0:9091
@@ -65,6 +64,7 @@ data:
         - name: authelia_session
           domain: th3borg.org
           authelia_url: https://authelia.th3borg.org
+          default_redirection_url: https://th3borg.org
           expiration: 12h
           inactivity: 2h
           remember_me: 7d
