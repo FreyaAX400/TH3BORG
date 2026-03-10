@@ -22,6 +22,9 @@ data:
     webauthn:
       disable: false
       timeout: 60s
+      rpid: th3borg.org
+      rpicon: ""
+      rpdisplayname: TH3BORG
       selection_criteria:
         user_verification: preferred
 
