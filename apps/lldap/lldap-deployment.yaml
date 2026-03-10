@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lldap
+  namespace: lldap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lldap
+  template:
+    metadata:
+      labels:
+        app: lldap
+    spec:
+      enableServiceLinks: false
+      nodeSelector:
+        kubernetes.io/hostname: borgling-1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: lldap
+          image: lldap/lldap:stable
+          ports:
+            - containerPort: 3890
+              name: ldap
+            - containerPort: 17170
+              name: web
+          env:
+            - name: LLDAP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-secrets
+                  key: JWT_SECRET
+            - name: LLDAP_LDAP_USER_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: lldap-secrets
+                  key: ADMIN_PASSWORD
+            - name: LLDAP_LDAP_BASE_DN
+              value: "dc=th3borg,dc=org"
+            - name: LLDAP_LDAP_USER_DN
+              value: "admin"
+            - name: LLDAP_HTTP_URL
+              value: "https://lldap.th3borg.org"
+            - name: TZ
+              value: "Europe/Stockholm"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: lldap-data
