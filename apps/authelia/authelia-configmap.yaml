@@ -9,14 +9,10 @@ data:
     default_redirection_url: https://th3borg.org
 
     server:
-      host: 0.0.0.0
-      port: 9091
+      address: tcp://0.0.0.0:9091
 
     log:
       level: info
-
-    ntp:
-      disable_startup_check: true
 
     ntp:
       disable_startup_check: true
@@ -32,7 +28,7 @@ data:
     authentication_backend:
       ldap:
         implementation: custom
-        url: ldap://lldap.lldap.svc.cluster.local:3890
+        address: ldap://lldap.lldap.svc.cluster.local:3890
         timeout: 5s
         start_tls: false
         base_dn: dc=th3borg,dc=org
@@ -45,32 +41,35 @@ data:
         mail_attribute: mail
         display_name_attribute: displayName
         user: uid=admin,ou=people,dc=th3borg,dc=org
-        password: ${LLDAP_PASSWORD}
+        password: ${AUTHELIA_AUTHENTICATION_BACKEND_LDAP_PASSWORD}
 
     access_control:
-      default_policy: deny
+      default_policy: two_factor
       rules:
         - domain: th3borg.org
           policy: bypass
-        - domain: "*.th3borg.org"
-          resources:
-            - "^/dashboard.*"
-          policy: two_factor
         - domain: authelia.th3borg.org
           policy: bypass
         - domain: lldap.th3borg.org
           policy: two_factor
         - domain: "*.th3borg.org"
+          resources:
+            - "^/dashboard.*"
+          policy: two_factor
+        - domain: "*.th3borg.org"
           policy: bypass
 
     session:
-      name: authelia_session
-      domain: th3borg.org
-      expiration: 12h
-      inactivity: 2h
-      remember_me_duration: 7d
+      secret: ${AUTHELIA_SESSION_SECRET}
+      cookies:
+        - name: authelia_session
+          domain: th3borg.org
+          authelia_url: https://authelia.th3borg.org
+          expiration: 12h
+          inactivity: 2h
+          remember_me: 7d
       redis:
-        host: authelia-valkey.authelia
+        host: authelia-valkey.authelia.svc.cluster.local
         port: 6379
 
     regulation:
@@ -79,15 +78,14 @@ data:
       ban_time: 10m
 
     storage:
-      encryption_key: ${STORAGE_ENCRYPTION_KEY}
+      encryption_key: ${AUTHELIA_STORAGE_ENCRYPTION_KEY}
       postgres:
-        host: authelia-postgres.authelia
-        port: 5432
+        address: tcp://authelia-postgres.authelia.svc.cluster.local:5432
         database: authelia
         username: authelia
-        password: ${POSTGRES_PASSWORD}
+        password: ${AUTHELIA_STORAGE_POSTGRES_PASSWORD}
 
     notifier:
       disable_startup_check: true
       filesystem:
-        filename: /config/notification.txt
+        filename: /tmp/notification.txt
