@@ -5,10 +5,10 @@ metadata:
   namespace: registry
   annotations:
     nginx.org/client-max-body-size: "0"
+    nginx.org/proxy-buffering: "False"
+    nginx.org/proxy-connect-timeout: "600"
     nginx.org/proxy-read-timeout: "600"
     nginx.org/proxy-send-timeout: "600"
-    nginx.org/proxy-connect-timeout: "600"
-    nginx.org/proxy-buffering: "off"
 spec:
   ingressClassName: nginx
   rules:
