@@ -6,7 +6,11 @@ metadata:
   annotations:
     nginx.org/proxy-read-timeout: "360"
     nginx.org/proxy-send-timeout: "360"
-    nginx.org/proxy-set-headers: "authelia-headers"
+    nginx.org/server-snippets: |
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_set_header X-Forwarded-Host $host;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Real-IP $remote_addr;
 spec:
   ingressClassName: nginx
   rules:
