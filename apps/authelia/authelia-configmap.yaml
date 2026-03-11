@@ -80,6 +80,10 @@ data:
           policy: two_factor
           subject:
             - group:th3borg_admin
+        - domain: gitea.th3borg.org
+          policy: two_factor
+          subject:
+            - group:th3borg_admin
     session:
       secret: ${AUTHELIA_SESSION_SECRET}
       cookies:
