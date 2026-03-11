@@ -5,6 +5,9 @@ metadata:
   namespace: vaultwarden
   annotations:
     nginx.org/client-max-body-size: "128m"
+    th3borg.org/apps-portal: "true"
+    th3borg.org/apps-name: "Vaultwarden"
+    th3borg.org/apps-description: "Vaultwarden — the safer, smarter password manager."
 spec:
   ingressClassName: nginx
   rules:
