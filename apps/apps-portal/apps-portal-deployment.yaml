@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apps-portal
+  namespace: apps-portal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apps-portal
+  template:
+    metadata:
+      labels:
+        app: apps-portal
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: borgling-1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: nginx
+          image: 100.124.41.14:32000/th3borg-apps-portal:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: apps-portal
+  namespace: apps-portal
+spec:
+  selector:
+    app: apps-portal
+  ports:
+    - port: 80
+      targetPort: 80
