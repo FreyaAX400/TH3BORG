@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TH3BORG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #0e0f11;
+  --bg-panel:    #13151a;
+  --bg-card:     #1a1d24;
+  --border:      #2a2d36;
+  --border-hi:   #3d4150;
+  --orange:      #ff6b1a;
+  --orange-dim:  #c44e0e;
+  --orange-glow: #ff6b1a44;
+  --orange-pale: #ff9a5c;
+  --grey-1:      #f0f2f5;
+  --grey-2:      #9aa0b0;
+  --grey-3:      #5a6070;
+  --text:        #d0d4de;
+  --text-dim:    #6b7280;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 0 L56 16 L56 50 L28 66 L0 50 L0 16 Z' fill='none' stroke='%232a2d36' stroke-width='0.5'/%3E%3Cpath d='M28 66 L56 82 L56 116 L28 132 L0 116 L0 82 Z' fill='none' stroke='%232a2d36' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size: 56px 100px;
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--orange), var(--orange-dim), transparent);
+  z-index: 100;
+}
+
+.nav-strip {
+  position: fixed;
+  top: 18px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+}
+
+.nav-link {
+  color: var(--grey-3);
+  text-decoration: none;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
+  transition: all 0.2s;
+  display: inline-block;
+}
+
+.nav-link:hover {
+  color: var(--orange);
+  border-color: var(--orange-dim);
+  background: var(--bg-card);
+}
+
+.nav-sep {
+  color: var(--border-hi);
+  font-size: 0.5rem;
+}
+
+.corner {
+  position: fixed;
+  width: 48px;
+  height: 48px;
+  z-index: 2;
+}
+.corner::before, .corner::after {
+  content: '';
+  position: absolute;
+  background: var(--orange-dim);
+  opacity: 0.6;
+}
+.corner::before { width: 100%; height: 1px; top: 0; left: 0; }
+.corner::after  { width: 1px; height: 100%; top: 0; left: 0; }
+.corner.tl { top: 24px; left: 24px; }
+.corner.tr { top: 24px; right: 24px; transform: scaleX(-1); }
+.corner.bl { bottom: 24px; left: 24px; transform: scaleY(-1); }
+.corner.br { bottom: 24px; right: 24px; transform: scale(-1); }
+
+.container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  padding: 2rem;
+  opacity: 0;
+  animation: reveal 1s ease forwards 0.2s;
+}
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.text-block {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.greeting {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 500;
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  color: var(--grey-2);
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+}
+
+.greeting strong {
+  color: var(--grey-1);
+  font-weight: 700;
+}
+
+.uptime-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+  color: var(--grey-3);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.uptime-row::before,
+.uptime-row::after {
+  content: '';
+  display: block;
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--orange-dim));
+}
+.uptime-row::after {
+  background: linear-gradient(90deg, var(--orange-dim), transparent);
+}
+
+#uptime-value {
+  color: var(--orange);
+  font-weight: 700;
+  font-size: clamp(0.75rem, 2vw, 0.95rem);
+  min-width: 9ch;
+  text-align: center;
+}
+
+.logo-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  position: relative;
+  padding: 2rem 3rem;
+  transition: border-color 0.3s;
+  clip-path: polygon(16px 0%, 100% 0%, calc(100% - 16px) 100%, 0% 100%);
+}
+
+.logo-panel:hover { border-color: var(--border-hi); }
+
+.logo-panel::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 80px; height: 2px;
+  background: var(--orange);
+}
+
+.logo-panel::before {
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 0 20px 20px 0;
+  border-color: transparent var(--bg) transparent transparent;
+  z-index: 2;
+}
+
+.logo-img {
+  width: clamp(100px, 14vw, 160px);
+  height: auto;
+  display: block;
+  image-rendering: pixelated;
+  opacity: 0;
+  animation: logo-in 0.8s ease forwards 0.6s, logo-glow 3s ease-in-out 1.4s infinite;
+}
+
+@keyframes logo-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes logo-glow {
+  0%, 100% { filter: drop-shadow(0 0 12px var(--orange-glow)); }
+  50%       { filter: drop-shadow(0 0 24px rgba(255,107,26,0.4)); }
+}
+
+.footer-label {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Orbitron', monospace;
+  font-size: 0.55rem;
+  color: var(--grey-3);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.footer-label span { color: var(--orange-dim); }
+</style>
+</head>
+<body>
+
+<nav class="nav-strip">
+  <a href="https://control.th3borg.org" class="nav-link">CONTROL</a>
+  <span class="nav-sep">|</span>
+  <a href="https://apps.th3borg.org" class="nav-link">APPS</a>
+</nav>
+
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<div class="container">
+  <div class="text-block">
+    <p class="greeting">
+      Welcome dear traveler, you have found us. We are <strong>TH3BORG</strong>,
+    </p>
+    <div class="uptime-row">
+      we have been waiting for you for <span id="uptime-value">...</span>
+    </div>
+  </div>
+
+  <div class="logo-panel">
+    <img class="logo-img" src="/logo.png" alt="TH3BORG" />
+  </div>
+</div>
+
+<p class="footer-label">TH3BORG &mdash; <span>ONLINE</span></p>
+
+<script>
+const API_KEY = "415aff5be41eb8659d9ca71c441e3d0f4439adb1eda26c6ed01419be800108eb";
+
+function fmt(s) {
+  if (!s && s !== 0) return "UNKNOWN";
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  if (d > 0) return d + "D " + h + "H " + m + "M";
+  if (h > 0) return h + "H " + m + "M " + sec + "S";
+  return m + "M " + sec + "S";
+}
+
+async function tick() {
+  try {
+    const r = await fetch("https://api.th3borg.org/v1/cluster/uptime", {
+      headers: { "Authorization": "Bearer " + API_KEY }
+    });
+    const data = await r.json();
+    document.getElementById("uptime-value").textContent = fmt(data.uptime_seconds);
+  } catch {
+    document.getElementById("uptime-value").textContent = "UNKNOWN";
+  }
+}
+
+tick();
+setInterval(tick, 60000);
+</script>
+</body>
+</html>
