@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: navidrome
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/FreyaAX400/TH3BORG.git
+    targetRevision: HEAD
+    path: apps/navidrome
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: navidrome
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

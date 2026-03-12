@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: navidrome
+  namespace: navidrome
+  annotations:
+    th3borg.org/apps-portal: "true"
+    th3borg.org/apps-name: "Navidrome"
+    th3borg.org/apps-description: "Music streaming server"
+    th3borg.org/apps-icon: "music"
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: music.th3borg.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: navidrome
+                port:
+                  number: 4533
