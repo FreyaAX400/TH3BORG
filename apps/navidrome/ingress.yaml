@@ -8,7 +8,7 @@ metadata:
     th3borg.org/apps-name: "Navidrome"
     th3borg.org/apps-description: "Music streaming server"
     th3borg.org/apps-icon: "music"
-    kubernetes.io/ingress.class: traefik
+    kubernetes.io/ingress.class: nginx
 spec:
   rules:
     - host: music.th3borg.org
