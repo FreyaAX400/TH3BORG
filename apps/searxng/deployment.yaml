@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: searxng
+  namespace: searxng
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: searxng
+  template:
+    metadata:
+      labels:
+        app: searxng
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: searxng
+          image: searxng/searxng:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: BASE_URL
+              value: "https://search.th3borg.org"
+            - name: INSTANCE_NAME
+              value: "TH3BORG Search"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/searxng/settings.yml
+              subPath: settings.yml
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 1000m
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      volumes:
+        - name: config
+          configMap:
+            name: searxng-config

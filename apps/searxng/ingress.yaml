@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: searxng
+  namespace: searxng
+  annotations:
+    th3borg.org/apps-portal: "true"
+    th3borg.org/apps-name: "SearXNG"
+    th3borg.org/apps-description: "Privacy respecting metasearch engine"
+    th3borg.org/apps-icon: "search"
+spec:
+  rules:
+    - host: search.th3borg.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: searxng
+                port:
+                  number: 8080
