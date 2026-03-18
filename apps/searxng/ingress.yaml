@@ -4,6 +4,7 @@ metadata:
   name: searxng
   namespace: searxng
   annotations:
+    kubernetes.io/ingress.class: nginx
     th3borg.org/apps-portal: "true"
     th3borg.org/apps-name: "SearXNG"
     th3borg.org/apps-description: "Privacy respecting metasearch engine"
