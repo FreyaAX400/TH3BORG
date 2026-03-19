@@ -11,4 +11,5 @@ resources:
   - configmap.yaml
   - deployment.yaml
   - service.yaml
+  - sealed-secret.yaml
   - ingress.yaml
