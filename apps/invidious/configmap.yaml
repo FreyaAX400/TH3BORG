@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: invidious-config
+  namespace: invidious
+data:
+  config.yml: |
+    channel_threads: 1
+    feed_threads: 1
+    db:
+      user: invidious
+      password: oRO7uYlk0sjDBCShzOeTvud25gQGiySMESXFiw0c
+      host: invidious-postgres
+      port: 5432
+      dbname: invidious
+    full_refresh: false
+    https_only: true
+    domain: tube.th3borg.org
+    external_port: 443
+    hmac_key: "n5CW4mZfuKBD10KJOirUeA"
+    invidious_companion_key: "PPMHUcUFPG9GICK2NiUndw"
+    invidious_companion:
+      - private_url: http://invidious-companion:8282
+        public_url: https://tube.th3borg.org
+    statistics_enabled: false
+    default_user_preferences:
+      locale: en-US
+      region: US
+      dark_mode: dark
+      thin_mode: false
+      feed_menu:
+        - Subscriptions
+        - Playlists

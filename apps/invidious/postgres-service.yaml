@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: invidious-postgres
+  namespace: invidious
+spec:
+  selector:
+    app: invidious-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

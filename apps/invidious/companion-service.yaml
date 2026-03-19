@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: invidious-companion
+  namespace: invidious
+spec:
+  selector:
+    app: invidious-companion
+  ports:
+    - port: 8282
+      targetPort: 8282

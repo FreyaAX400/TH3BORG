@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invidious-postgres
+  namespace: invidious
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invidious-postgres
+  template:
+    metadata:
+      labels:
+        app: invidious-postgres
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: borgling-1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: postgres
+          image: docker.io/library/postgres:16-alpine
+          env:
+            - name: POSTGRES_DB
+              value: invidious
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: invidious-secrets
+                  key: db-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: invidious-secrets
+                  key: db-password
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 500m
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: invidious-postgres-pvc

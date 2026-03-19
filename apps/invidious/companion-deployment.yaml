@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invidious-companion
+  namespace: invidious
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invidious-companion
+  template:
+    metadata:
+      labels:
+        app: invidious-companion
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: companion
+          image: quay.io/invidious/invidious-companion:latest
+          env:
+            - name: SERVER_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: invidious-secrets
+                  key: companion-key
+          ports:
+            - containerPort: 8282
+          volumeMounts:
+            - name: cache
+              mountPath: /var/tmp/youtubei.js
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 1Gi
+              cpu: 1000m
+      volumes:
+        - name: cache
+          persistentVolumeClaim:
+            claimName: invidious-companion-cache
