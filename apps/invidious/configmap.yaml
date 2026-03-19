@@ -19,7 +19,7 @@ data:
     port: 3000
     external_port: 443
     hmac_key: "n5CW4mZfuKBD10KJOirUeA"
-    invidious_companion_key: "SMvBZLdywguHwEn"
+    invidious_companion_key: "mUNfLuDHuLYgQa9M"
     invidious_companion:
       - private_url: http://invidious-companion:8282
         public_url: https://tube.th3borg.org
