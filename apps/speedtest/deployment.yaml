@@ -24,7 +24,7 @@ spec:
             - containerPort: 80
           env:
             - name: APP_KEY
-              value: "CHANGEME32CHARKEY"
+              value: "x4LgRVrIz3ep38fNrltSFydKmeufy9PE"
             - name: DB_CONNECTION
               value: sqlite
             - name: DISPLAY_TIMEZONE
