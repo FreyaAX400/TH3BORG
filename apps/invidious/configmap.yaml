@@ -24,6 +24,7 @@ data:
       - private_url: http://invidious-companion:8282
         public_url: https://tube.th3borg.org
     statistics_enabled: false
+    captcha_enabled: false
     default_user_preferences:
       locale: en-US
       region: US
