@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: privatebin
+  namespace: privatebin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: privatebin
+  template:
+    metadata:
+      labels:
+        app: privatebin
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: privatebin
+          image: privatebin/nginx-fpm-alpine:latest
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 50m
+            limits:
+              memory: 256Mi
+              cpu: 500m
+          volumeMounts:
+            - name: data
+              mountPath: /srv/data
+      volumes:
+        - name: data
+          emptyDir: {}

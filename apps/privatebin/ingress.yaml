@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: privatebin
+  namespace: privatebin
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    th3borg.org/apps-portal: "true"
+    th3borg.org/apps-name: "PrivateBin"
+    th3borg.org/apps-description: "Self-hosted pastebin"
+    th3borg.org/apps-icon: "clipboard"
+spec:
+  rules:
+    - host: paste.th3borg.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: privatebin
+                port:
+                  number: 8080

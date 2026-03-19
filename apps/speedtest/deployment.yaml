@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: speedtest
+  namespace: speedtest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: speedtest
+  template:
+    metadata:
+      labels:
+        app: speedtest
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: speedtest
+          image: lscr.io/linuxserver/speedtest-tracker:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: APP_KEY
+              value: "CHANGEME32CHARKEY"
+            - name: DB_CONNECTION
+              value: sqlite
+            - name: DISPLAY_TIMEZONE
+              value: America/Los_Angeles
+          volumeMounts:
+            - name: data
+              mountPath: /config
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 500m
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: speedtest-data
