@@ -17,6 +17,7 @@ spec:
         - key: node-role.kubernetes.io/control-plane
           operator: Exists
           effect: NoSchedule
+      enableServiceLinks: false
       containers:
         - name: invidious
           image: quay.io/invidious/invidious:latest-arm64
