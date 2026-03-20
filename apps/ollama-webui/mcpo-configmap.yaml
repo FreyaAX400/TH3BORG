@@ -7,21 +7,13 @@ data:
   config.json: |
     {
       "mcpServers": {
-        "time": {
-          "command": "uvx",
-          "args": ["mcp-server-time", "--local-timezone=America/Los_Angeles"]
-        },
         "fetch": {
           "command": "uvx",
           "args": ["mcp-server-fetch"]
         },
-        "filesystem": {
-          "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/borg"]
-        },
-        "sequential-thinking": {
-          "command": "npx",
-          "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+        "time": {
+          "command": "uvx",
+          "args": ["mcp-server-time", "--local-timezone=America/Los_Angeles"]
         }
       }
     }
