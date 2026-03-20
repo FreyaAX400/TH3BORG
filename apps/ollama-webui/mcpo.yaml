@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcpo
+  namespace: ollama-webui
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: mcpo
+  template:
+    metadata:
+      labels:
+        app: mcpo
+    spec:
+      initContainers:
+        - name: init-config
+          image: busybox:latest
+          command: ["sh", "-c", "cp /config-source/config.json /app/config/config.json"]
+          volumeMounts:
+            - name: config-source
+              mountPath: /config-source
+            - name: mcpo-config
+              mountPath: /app/config
+      containers:
+        - name: mcpo
+          image: ghcr.io/open-webui/mcpo:main
+          args: ["--port", "8000", "--config", "/app/config/config.json"]
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: mcpo-config
+              mountPath: /app/config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+      volumes:
+        - name: config-source
+          configMap:
+            name: mcpo-config
+        - name: mcpo-config
+          persistentVolumeClaim:
+            claimName: mcpo-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcpo
+  namespace: ollama-webui
+spec:
+  selector:
+    app: mcpo
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP
