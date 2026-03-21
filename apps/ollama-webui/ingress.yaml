@@ -12,6 +12,7 @@ metadata:
     nginx.org/proxy-send-timeout: "600"
     nginx.org/client-max-body-size: "50m"
     nginx.org/proxy-buffering: "off"
+    nginx.org/websocket-services: "open-webui"
 spec:
   ingressClassName: nginx
   rules:
