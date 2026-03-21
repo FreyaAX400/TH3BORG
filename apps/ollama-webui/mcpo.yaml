@@ -17,6 +17,10 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: borgling-1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
       initContainers:
         - name: init-config
           image: busybox:latest
