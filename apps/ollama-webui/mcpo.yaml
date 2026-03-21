@@ -30,9 +30,14 @@ spec:
           args: ["--port", "8000", "--config", "/app/config/config.json"]
           ports:
             - containerPort: 8000
+          env:
+            - name: UV_CACHE_DIR
+              value: "/app/uv-cache"
           volumeMounts:
             - name: mcpo-config
               mountPath: /app/config
+            - name: uv-cache
+              mountPath: /app/uv-cache
           resources:
             requests:
               cpu: 100m
@@ -44,8 +49,9 @@ spec:
             httpGet:
               path: /docs
               port: 8000
-            initialDelaySeconds: 20
+            initialDelaySeconds: 300
             periodSeconds: 30
+            failureThreshold: 3
       volumes:
         - name: config-source
           configMap:
@@ -53,6 +59,9 @@ spec:
         - name: mcpo-config
           persistentVolumeClaim:
             claimName: mcpo-config
+        - name: uv-cache
+          persistentVolumeClaim:
+            claimName: mcpo-uv-cache
 ---
 apiVersion: v1
 kind: Service

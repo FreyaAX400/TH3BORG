@@ -34,6 +34,14 @@ spec:
               value: "true"
             - name: DEFAULT_LOCALE
               value: "en"
+            - name: RAG_EMBEDDING_ENGINE
+              value: "ollama"
+            - name: RAG_EMBEDDING_MODEL
+              value: "nomic-embed-text"
+            - name: AUDIO_STT_ENGINE
+              value: ""
+            - name: AUDIO_TTS_ENGINE
+              value: ""
           volumeMounts:
             - name: webui-data
               mountPath: /app/backend/data
@@ -48,7 +56,7 @@ spec:
             httpGet:
               path: /health
               port: 8080
-            initialDelaySeconds: 30
+            initialDelaySeconds: 120
             periodSeconds: 30
       volumes:
         - name: webui-data
