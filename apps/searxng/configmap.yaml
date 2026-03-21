@@ -9,6 +9,7 @@ data:
     server:
       secret_key: "iDtYUfgVDhznsxG1u0U26DOTljznsOn6TNVNMv8hbuY"
       limiter: false
+  public_instance: true
       image_proxy: true
       base_url: "https://search.th3borg.org"
     ui:
