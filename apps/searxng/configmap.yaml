@@ -17,6 +17,9 @@ data:
     search:
       safe_search: 0
       autocomplete: "duckduckgo"
+      formats:
+        - html
+        - json
     engines:
       - name: google
         engine: google
