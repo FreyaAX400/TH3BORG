@@ -24,18 +24,9 @@ spec:
       containers:
         - name: mongodb
           image: mongo:4.4.18
+          command: ["mongod", "--bind_ip_all", "--dbpath", "/data/db"]
           ports:
             - containerPort: 27017
-          env:
-            - name: MONGO_INITDB_ROOT_USERNAME
-              value: librechat
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: librechat-mongodb-secret
-                  key: mongodb-password
-            - name: MONGO_INITDB_DATABASE
-              value: librechat
           volumeMounts:
             - name: mongodb-data
               mountPath: /data/db
