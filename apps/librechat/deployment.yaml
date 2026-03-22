@@ -1,0 +1,6 @@
+            - name: TRUST_PROXY
+              value: "true"
+            - name: DOMAIN_CLIENT
+              value: "https://your-domain.com"
+            - name: DOMAIN_SERVER
+              value: "https://your-domain.com"
