@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: librechat-config
+  namespace: librechat
+data:
+  librechat.yaml: |
+    version: 1.2.1
+    cache: true
+    endpoints:
+      ollama:
+        baseURL: "http://100.106.53.62:11434/v1"
+        models:
+          default: ["qwen3:8b"]
+          fetch: true
+        titleConvo: true
+        titleModel: "qwen3:8b"
+        summarize: false
+        forcePrompt: false
+        modelDisplayLabel: "BORG"
+    mcpServers:
+      time:
+        type: stdio
+        command: uvx
+        args:
+          - mcp-server-time
+          - "--local-timezone=America/Los_Angeles"
+      fetch:
+        type: stdio
+        command: uvx
+        args:
+          - mcp-server-fetch

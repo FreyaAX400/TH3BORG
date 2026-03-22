@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: librechat-mongodb-ext
+  name: librechat-mongodb
   namespace: librechat
 spec:
   replicas: 1
@@ -9,11 +9,11 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: librechat-mongodb-ext
+      app: librechat-mongodb
   template:
     metadata:
       labels:
-        app: librechat-mongodb-ext
+        app: librechat-mongodb
     spec:
       nodeSelector:
         kubernetes.io/hostname: borgling-1
@@ -33,7 +33,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: librechat-mongodb-secret
-                  key: mongodb-passwords
+                  key: mongodb-password
             - name: MONGO_INITDB_DATABASE
               value: librechat
           volumeMounts:
@@ -45,32 +45,28 @@ spec:
               memory: 256Mi
             limits:
               cpu: 1000m
-              memory: 1Gi
+              memory: 512Mi
+          livenessProbe:
+            exec:
+              command:
+                - mongo
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 30
       volumes:
         - name: mongodb-data
           persistentVolumeClaim:
-            claimName: librechat-mongodb-ext
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: librechat-mongodb-ext
-  namespace: librechat
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
+            claimName: librechat-mongodb-data
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: librechat-mongodb-ext
+  name: librechat-mongodb
   namespace: librechat
 spec:
   selector:
-    app: librechat-mongodb-ext
+    app: librechat-mongodb
   ports:
     - port: 27017
       targetPort: 27017

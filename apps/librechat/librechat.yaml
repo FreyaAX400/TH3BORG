@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: librechat
+  namespace: librechat
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: librechat
+  template:
+    metadata:
+      labels:
+        app: librechat
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: borgling-1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: librechat
+          image: ghcr.io/danny-avila/librechat:latest
+          ports:
+            - containerPort: 3080
+          env:
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: librechat-secrets
+                  key: mongo-uri
+            - name: MEILI_HOST
+              value: "http://librechat-meilisearch:7700"
+            - name: MEILI_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: librechat-secrets
+                  key: meili-master-key
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: librechat-secrets
+                  key: jwt-secret
+            - name: JWT_REFRESH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: librechat-secrets
+                  key: jwt-refresh-secret
+            - name: CREDS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: librechat-secrets
+                  key: creds-key
+            - name: CREDS_IV
+              valueFrom:
+                secretKeyRef:
+                  name: librechat-secrets
+                  key: creds-iv
+            - name: APP_TITLE
+              value: "BORG"
+            - name: ALLOW_REGISTRATION
+              value: "false"
+            - name: ALLOW_EMAIL_LOGIN
+              value: "true"
+            - name: ALLOW_SOCIAL_LOGIN
+              value: "false"
+            - name: ALLOW_SOCIAL_REGISTRATION
+              value: "false"
+            - name: OLLAMA_BASE_URL
+              value: "http://100.106.53.62:11434"
+            - name: SESSION_EXPIRY
+              value: "604800000"
+            - name: REFRESH_TOKEN_EXPIRY
+              value: "2592000000"
+            - name: NODE_ENV
+              value: "production"
+          volumeMounts:
+            - name: librechat-images
+              mountPath: /app/client/public/images
+            - name: librechat-config
+              mountPath: /app/librechat.yaml
+              subPath: librechat.yaml
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+      volumes:
+        - name: librechat-images
+          persistentVolumeClaim:
+            claimName: librechat-images
+        - name: librechat-config
+          configMap:
+            name: librechat-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: librechat
+  namespace: librechat
+spec:
+  selector:
+    app: librechat
+  ports:
+    - port: 3080
+      targetPort: 3080
+  type: ClusterIP

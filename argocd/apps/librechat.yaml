@@ -5,16 +5,10 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  sources:
-    - chart: librechat
-      repoURL: ghcr.io/danny-avila/librechat-chart
-      targetRevision: "*"
-      helm:
-        valueFiles:
-          - $values/apps/librechat/values.yaml
-    - repoURL: https://github.com/FreyaAX400/TH3BORG.git
-      targetRevision: HEAD
-      ref: values
+  source:
+    repoURL: https://github.com/FreyaAX400/TH3BORG.git
+    targetRevision: HEAD
+    path: apps/librechat
   destination:
     server: https://kubernetes.default.svc
     namespace: librechat
