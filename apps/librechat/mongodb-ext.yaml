@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: librechat-mongodb-ext
+  namespace: librechat
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: librechat-mongodb-ext
+  template:
+    metadata:
+      labels:
+        app: librechat-mongodb-ext
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: borgling-1
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: mongodb
+          image: mongo:7.0
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: librechat
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: librechat-mongodb-secret
+                  key: mongodb-passwords
+            - name: MONGO_INITDB_DATABASE
+              value: librechat
+          volumeMounts:
+            - name: mongodb-data
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+      volumes:
+        - name: mongodb-data
+          persistentVolumeClaim:
+            claimName: librechat-mongodb-ext
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: librechat-mongodb-ext
+  namespace: librechat
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: librechat-mongodb-ext
+  namespace: librechat
+spec:
+  selector:
+    app: librechat-mongodb-ext
+  ports:
+    - port: 27017
+      targetPort: 27017
+  type: ClusterIP

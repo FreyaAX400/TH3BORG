@@ -20,6 +20,7 @@ librechat:
     RAG_API_URL: "http://librechat-rag-api:8000"
     SESSION_EXPIRY: "1000 * 60 * 60 * 24 * 7"
     REFRESH_TOKEN_EXPIRY: "1000 * 60 * 60 * 24 * 30"
+    MONGO_URI: "mongodb://librechat:@librechat-mongodb-ext:27017/librechat"
   config: |
     version: 1.2.1
     cache: true
@@ -48,17 +49,7 @@ librechat:
           - mcp-server-fetch
 credentialsSecretName: "librechat-credentials-env"
 mongodb:
-  enabled: true
-  image:
-    registry: docker.io
-    repository: mongodb/mongodb-community-server
-    tag: "7.0-ubi8"
-  auth:
-    enabled: true
-    existingSecret: "librechat-mongodb-secret"
-  persistence:
-    enabled: true
-    size: 10Gi
+  enabled: false
 meilisearch:
   enabled: true
   persistence:
