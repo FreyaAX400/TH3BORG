@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: librechat
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - chart: librechat
+      repoURL: ghcr.io/danny-avila/librechat-chart
+      targetRevision: "*"
+      helm:
+        valueFiles:
+          - $values/apps/librechat/values.yaml
+    - repoURL: https://github.com/FreyaAX400/TH3BORG.git
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: librechat
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
