@@ -52,7 +52,7 @@ mongodb:
   image:
     registry: docker.io
     repository: mongodb/mongodb-community-server
-    tag: "7.0-ubi8"
+    tag: "8.2-ubi8"
   auth:
     enabled: true
     existingSecret: "librechat-mongodb-secret"
