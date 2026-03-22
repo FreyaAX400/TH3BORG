@@ -47,7 +47,8 @@ mongodb:
   enabled: true
   image:
     registry: registry.bitnami.com
-    tag: "7.0"
+    repository: bitnami/mongodb
+    tag: "7.0.21"
   auth:
     enabled: true
     existingSecret: "librechat-mongodb-secret"
