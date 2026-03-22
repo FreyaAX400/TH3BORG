@@ -50,9 +50,9 @@ credentialsSecretName: "librechat-credentials-env"
 mongodb:
   enabled: true
   image:
-    registry: registry.bitnami.com
-    repository: bitnami/mongodb
-    tag: "7.0.21"
+    registry: docker.io
+    repository: mongodb/mongodb-community-server
+    tag: "7.0-ubi8"
   auth:
     enabled: true
     existingSecret: "librechat-mongodb-secret"
