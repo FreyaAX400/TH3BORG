@@ -1,3 +1,7 @@
+global:
+  security:
+    allowInsecureImages: true
+
 # LibreChat Helm values for TH3BORG
 # Chart: oci://ghcr.io/danny-avila/librechat-chart/librechat
 
