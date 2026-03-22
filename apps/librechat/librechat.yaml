@@ -77,6 +77,8 @@ spec:
               value: "2592000000"
             - name: NODE_ENV
               value: "production"
+            - name: CONFIG_BYPASS_VALIDATION
+              value: "true"
           volumeMounts:
             - name: librechat-images
               mountPath: /app/client/public/images
