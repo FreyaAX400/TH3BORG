@@ -24,10 +24,9 @@
   --green:       #3aff8c;
   --red:         #ff3a3a;
   --yellow:      #ffb83a;
+  --blue:        #3ab8ff;
 }
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
   background: var(--bg);
   color: var(--text);
@@ -36,7 +35,6 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-
 body::before {
   content: "";
   position: fixed;
@@ -47,7 +45,6 @@ body::before {
   pointer-events: none;
   z-index: 0;
 }
-
 body::after {
   content: "";
   position: fixed;
@@ -56,250 +53,102 @@ body::after {
   background: linear-gradient(90deg, transparent, var(--orange), var(--orange-dim), transparent);
   z-index: 100;
 }
-
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
-  position: relative;
-  z-index: 1;
-}
-
+.container { max-width: 1100px; margin: 0 auto; padding: 2rem; position: relative; z-index: 1; }
 .header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border);
   position: relative;
 }
-
-.header::after {
-  content: "";
-  position: absolute;
-  bottom: -1px; left: 0;
-  width: 120px; height: 1px;
-  background: var(--orange);
-}
-
+.header::after { content: ""; position: absolute; bottom: -1px; left: 0; width: 120px; height: 1px; background: var(--orange); }
 .logo-block { display: flex; flex-direction: column; gap: 0.3rem; }
-
-.logo {
-  font-family: 'Orbitron', monospace;
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-  font-weight: 900;
-  color: var(--grey-1);
-  letter-spacing: 0.05em;
-  line-height: 1;
-}
-
+.logo { font-family: 'Orbitron', monospace; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; color: var(--grey-1); letter-spacing: 0.05em; line-height: 1; }
 .logo span { color: var(--orange); }
-
-.logo-sub {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.6rem;
-  color: var(--grey-3);
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-}
-
-.header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-}
-
-.back-link {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.6rem;
-  color: var(--grey-3);
-  text-decoration: none;
-  letter-spacing: 0.2em;
-  padding: 0.3rem 0.8rem;
-  border: 1px solid var(--border);
-  background: var(--bg-panel);
-  clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
-  transition: all 0.2s;
-}
-
-.back-link:hover {
-  color: var(--orange);
-  border-color: var(--orange-dim);
-}
-
-.status-summary {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.6rem;
-  color: var(--grey-3);
-  letter-spacing: 0.15em;
-}
-
-.status-summary span { color: var(--orange); }
-
-.apps-grid {
+.logo-sub { font-family: 'Orbitron', monospace; font-size: 0.6rem; color: var(--grey-3); letter-spacing: 0.4em; text-transform: uppercase; }
+.header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
+.back-link { font-family: 'Orbitron', monospace; font-size: 0.6rem; color: var(--grey-3); text-decoration: none; letter-spacing: 0.2em; padding: 0.3rem 0.8rem; border: 1px solid var(--border); background: var(--bg-panel); clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%); transition: all 0.2s; }
+.back-link:hover { color: var(--orange); border-color: var(--orange-dim); }
+.status-summary { font-family: 'Orbitron', monospace; font-size: 0.6rem; color: var(--grey-3); letter-spacing: 0.15em; display: flex; gap: 1rem; }
+.status-summary .up { color: var(--green); }
+.status-summary .deg { color: var(--yellow); }
+.status-summary .down { color: var(--red); }
+.cluster-bar {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1.2rem;
-}
-
-.app-card {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
   background: var(--bg-panel);
   border: 1px solid var(--border);
   position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s, transform 0.2s;
-  display: flex;
-  flex-direction: column;
-  opacity: 0;
-  animation: card-in 0.4s ease forwards;
 }
-
-.app-card:hover {
-  border-color: var(--border-hi);
-  transform: translateY(-2px);
-}
-
-.app-card::before {
-  content: "";
-  position: absolute;
-  top: 0; right: 0;
-  width: 0; height: 0;
-  border-style: solid;
-  border-width: 0 20px 20px 0;
-  border-color: transparent var(--bg) transparent transparent;
-  z-index: 2;
-}
-
-.app-card::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0;
-  width: 60px; height: 2px;
-  background: var(--orange);
-}
-
-@keyframes card-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.app-card-inner {
-  padding: 1.2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  flex: 1;
-}
-
-.app-header {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-}
-
-.app-status {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: var(--yellow);
-  box-shadow: 0 0 6px var(--yellow);
-  transition: background 0.3s, box-shadow 0.3s;
-}
-
-.app-status.up   { background: var(--green);  box-shadow: 0 0 6px var(--green); }
-.app-status.down { background: var(--red);    box-shadow: 0 0 6px var(--red); animation: blink 0.8s step-end infinite; }
-
+.cluster-bar::before { content: "CLUSTER"; position: absolute; top: -0.5rem; left: 1rem; font-family: 'Orbitron', monospace; font-size: 0.5rem; color: var(--grey-3); letter-spacing: 0.3em; background: var(--bg-panel); padding: 0 0.4rem; }
+.cluster-stat { display: flex; flex-direction: column; gap: 0.3rem; }
+.cluster-stat-label { font-family: 'Orbitron', monospace; font-size: 0.5rem; color: var(--grey-3); letter-spacing: 0.2em; }
+.cluster-stat-value { font-family: 'Orbitron', monospace; font-size: 1rem; font-weight: 700; color: var(--grey-1); }
+.cluster-stat-bar { height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; }
+.cluster-stat-bar-fill { height: 100%; background: var(--orange); border-radius: 1px; transition: width 0.5s ease; }
+.cluster-stat-bar-fill.warn { background: var(--yellow); }
+.cluster-stat-bar-fill.crit { background: var(--red); }
+.filter-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.filter-btn { font-family: 'Orbitron', monospace; font-size: 0.55rem; color: var(--grey-3); letter-spacing: 0.15em; padding: 0.3rem 0.8rem; border: 1px solid var(--border); background: var(--bg-panel); cursor: pointer; clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%); transition: all 0.15s; }
+.filter-btn:hover, .filter-btn.active { color: var(--orange); border-color: var(--orange-dim); background: var(--orange-glow); }
+.apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+.app-card { background: var(--bg-panel); border: 1px solid var(--border); position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; display: flex; flex-direction: column; opacity: 0; animation: card-in 0.4s ease forwards; }
+.app-card:hover { border-color: var(--border-hi); transform: translateY(-2px); }
+.app-card[data-status="down"] { border-color: rgba(255,58,58,0.3); }
+.app-card[data-status="degraded"] { border-color: rgba(255,184,58,0.3); }
+.app-card::before { content: ""; position: absolute; top: 0; right: 0; width: 0; height: 0; border-style: solid; border-width: 0 20px 20px 0; border-color: transparent var(--bg) transparent transparent; z-index: 2; }
+.app-card::after { content: ""; position: absolute; top: 0; left: 0; width: 60px; height: 2px; background: var(--orange); transition: background 0.3s; }
+.app-card[data-status="down"]::after { background: var(--red); }
+.app-card[data-status="degraded"]::after { background: var(--yellow); }
+.app-card[data-status="up"]::after { background: var(--green); }
+@keyframes card-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.app-card-inner { padding: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; flex: 1; }
+.app-header { display: flex; align-items: center; gap: 0.7rem; }
+.app-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--yellow); box-shadow: 0 0 6px var(--yellow); transition: background 0.3s, box-shadow 0.3s; }
+.app-status.up { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.app-status.down { background: var(--red); box-shadow: 0 0 6px var(--red); animation: blink 0.8s step-end infinite; }
+.app-status.degraded { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+.app-status.unknown { background: var(--grey-3); box-shadow: none; }
 @keyframes blink { 50% { opacity: 0.2; } }
-
-.app-name {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--grey-1);
-  letter-spacing: 0.05em;
-  flex: 1;
-}
-
-.app-description {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 400;
-  color: var(--grey-2);
-  line-height: 1.5;
-  flex: 1;
-}
-
-.app-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 0.8rem;
-  border-top: 1px solid var(--border);
-}
-
-.app-url {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.55rem;
-  color: var(--grey-3);
-  letter-spacing: 0.1em;
-}
-
-.app-launch {
-  font-family: 'Orbitron', monospace;
-  font-size: 0.6rem;
-  color: var(--orange);
-  text-decoration: none;
-  padding: 0.3rem 0.8rem;
-  border: 1px solid var(--orange-dim);
-  background: var(--orange-glow);
-  clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
-  letter-spacing: 0.15em;
-  transition: all 0.2s;
-}
-
-.app-launch:hover {
-  background: rgba(255,107,26,0.2);
-  border-color: var(--orange);
-  color: var(--orange-pale);
-}
-
-.loading-state {
-  grid-column: 1 / -1;
-  font-family: 'Orbitron', monospace;
-  font-size: 0.65rem;
-  color: var(--grey-3);
-  letter-spacing: 0.2em;
-  padding: 2rem 0;
-  text-align: center;
-}
-
-.footer {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: 'Orbitron', monospace;
-  font-size: 0.55rem;
-  color: var(--grey-3);
-  letter-spacing: 0.1em;
-}
-
+.app-name { font-family: 'Orbitron', monospace; font-size: 0.82rem; font-weight: 700; color: var(--grey-1); letter-spacing: 0.05em; flex: 1; }
+.app-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.badge { font-family: 'Orbitron', monospace; font-size: 0.45rem; letter-spacing: 0.15em; padding: 0.15rem 0.4rem; border: 1px solid var(--border); color: var(--grey-3); clip-path: polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%); }
+.badge.tier-core { border-color: var(--orange-dim); color: var(--orange); }
+.badge.tier-dev { border-color: #3d4150; color: var(--blue); }
+.app-description { font-size: 0.9rem; color: var(--grey-2); line-height: 1.5; flex: 1; }
+.app-metrics { display: flex; gap: 1rem; padding: 0.5rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.metric { display: flex; flex-direction: column; gap: 0.15rem; }
+.metric-label { font-family: 'Orbitron', monospace; font-size: 0.45rem; color: var(--grey-3); letter-spacing: 0.15em; }
+.metric-value { font-family: 'Orbitron', monospace; font-size: 0.7rem; color: var(--grey-1); }
+.metric-value.warn { color: var(--yellow); }
+.metric-value.crit { color: var(--red); }
+.metric-value.good { color: var(--green); }
+.app-footer { display: flex; align-items: center; justify-content: space-between; }
+.app-url { font-family: 'Orbitron', monospace; font-size: 0.5rem; color: var(--grey-3); letter-spacing: 0.1em; }
+.app-actions { display: flex; gap: 0.4rem; align-items: center; }
+.app-launch { font-family: 'Orbitron', monospace; font-size: 0.55rem; color: var(--orange); text-decoration: none; padding: 0.3rem 0.7rem; border: 1px solid var(--orange-dim); background: var(--orange-glow); clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%); letter-spacing: 0.15em; transition: all 0.2s; }
+.app-launch:hover { background: rgba(255,107,26,0.2); border-color: var(--orange); }
+.app-docs { font-family: 'Orbitron', monospace; font-size: 0.55rem; color: var(--grey-3); text-decoration: none; padding: 0.3rem 0.5rem; border: 1px solid var(--border); clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%); transition: all 0.2s; }
+.app-docs:hover { color: var(--blue); border-color: var(--blue); }
+.app-reason { font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; color: var(--red); opacity: 0.8; }
+.app-reason.degraded { color: var(--yellow); }
+.loading-state { grid-column: 1 / -1; font-family: 'Orbitron', monospace; font-size: 0.65rem; color: var(--grey-3); letter-spacing: 0.2em; padding: 2rem 0; text-align: center; }
+.footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-family: 'Orbitron', monospace; font-size: 0.5rem; color: var(--grey-3); letter-spacing: 0.1em; }
 .accent { color: var(--orange-dim); }
-
 @media (max-width: 600px) {
   .apps-grid { grid-template-columns: 1fr; }
   .header { flex-direction: column; gap: 1rem; }
   .header-right { align-items: flex-start; }
+  .cluster-bar { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
 <body>
-
 <div class="container">
   <header class="header">
     <div class="logo-block">
@@ -308,63 +157,178 @@ body::after {
     </div>
     <div class="header-right">
       <a href="https://th3borg.org" class="back-link">← HOME</a>
-      <div class="status-summary">SERVICES <span id="status-count">—</span></div>
+      <div class="status-summary" id="status-summary">—</div>
     </div>
   </header>
-
+  <div class="cluster-bar" id="cluster-bar" style="display:none">
+    <div class="cluster-stat">
+      <div class="cluster-stat-label">CPU</div>
+      <div class="cluster-stat-value" id="cl-cpu">—</div>
+      <div class="cluster-stat-bar"><div class="cluster-stat-bar-fill" id="cl-cpu-bar" style="width:0%"></div></div>
+    </div>
+    <div class="cluster-stat">
+      <div class="cluster-stat-label">MEMORY</div>
+      <div class="cluster-stat-value" id="cl-mem">—</div>
+      <div class="cluster-stat-bar"><div class="cluster-stat-bar-fill" id="cl-mem-bar" style="width:0%"></div></div>
+    </div>
+    <div class="cluster-stat">
+      <div class="cluster-stat-label">DISK</div>
+      <div class="cluster-stat-value" id="cl-disk">—</div>
+      <div class="cluster-stat-bar"><div class="cluster-stat-bar-fill" id="cl-disk-bar" style="width:0%"></div></div>
+    </div>
+    <div class="cluster-stat">
+      <div class="cluster-stat-label">PODS</div>
+      <div class="cluster-stat-value" id="cl-pods">—</div>
+    </div>
+    <div class="cluster-stat">
+      <div class="cluster-stat-label">NODES</div>
+      <div class="cluster-stat-value" id="cl-nodes">—</div>
+    </div>
+    <div class="cluster-stat">
+      <div class="cluster-stat-label">UPTIME</div>
+      <div class="cluster-stat-value" id="cl-uptime">—</div>
+    </div>
+  </div>
+  <div class="filter-bar" id="filter-bar" style="display:none">
+    <button class="filter-btn active" data-filter="all">ALL</button>
+    <button class="filter-btn" data-filter="up">ONLINE</button>
+    <button class="filter-btn" data-filter="degraded">DEGRADED</button>
+    <button class="filter-btn" data-filter="down">OFFLINE</button>
+  </div>
   <div class="apps-grid" id="apps-grid">
     <div class="loading-state">SCANNING SERVICES...</div>
   </div>
-
   <footer class="footer">
-    <span>TH3BORG HOMELAB &nbsp;<span class="accent">//</span>&nbsp; APPS PORTAL</span>
+    <span>TH3BORG HOMELAB &nbsp;<span class="accent">//</span>&nbsp; BORGN3T v2</span>
     <span id="last-refresh">—</span>
   </footer>
 </div>
-
 <script>
 const API_KEY = "8c4b5ecaf65b347621901fb96304f8ea943373c8ee165b84107cd6100cb758f3";
+let allServices = [];
+let activeFilter = "all";
+
+function fmtUptime(s) {
+  if (!s) return "—";
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  if (d > 0) return d + "d " + h + "h";
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0) return h + "h " + m + "m";
+  return m + "m";
+}
+
+function fmtPing(p) {
+  if (p === null || p === undefined) return "—";
+  if (p < 100) return '<span class="good">' + p + 'ms</span>';
+  if (p < 500) return '<span class="warn">' + p + 'ms</span>';
+  return '<span class="crit">' + p + 'ms</span>';
+}
+
+function barClass(pct) {
+  if (pct > 85) return "crit";
+  if (pct > 65) return "warn";
+  return "";
+}
+
+function renderCluster(cluster) {
+  if (!cluster) return;
+  document.getElementById("cluster-bar").style.display = "grid";
+  const cpu = cluster.cpu_pct;
+  document.getElementById("cl-cpu").textContent = cpu != null ? cpu + "%" : "—";
+  const cpuBar = document.getElementById("cl-cpu-bar");
+  cpuBar.style.width = (cpu || 0) + "%";
+  cpuBar.className = "cluster-stat-bar-fill " + barClass(cpu);
+  const mem = cluster.mem_used_pct;
+  document.getElementById("cl-mem").textContent = mem != null ? mem + "%" : "—";
+  const memBar = document.getElementById("cl-mem-bar");
+  memBar.style.width = (mem || 0) + "%";
+  memBar.className = "cluster-stat-bar-fill " + barClass(mem);
+  const disk = cluster.disk_used_pct;
+  document.getElementById("cl-disk").textContent = disk != null ? disk + "%" : "—";
+  const diskBar = document.getElementById("cl-disk-bar");
+  diskBar.style.width = (disk || 0) + "%";
+  diskBar.className = "cluster-stat-bar-fill " + barClass(disk);
+  document.getElementById("cl-pods").textContent = cluster.pods != null ? cluster.pods : "—";
+  document.getElementById("cl-nodes").textContent = cluster.node_count != null ? cluster.node_count : "—";
+  document.getElementById("cl-uptime").textContent = fmtUptime(cluster.uptime_seconds);
+}
+
+function renderServices(services) {
+  const filtered = activeFilter === "all" ? services : services.filter(s => s.status === activeFilter);
+  if (!filtered.length) {
+    document.getElementById("apps-grid").innerHTML = '<div class="loading-state">NO SERVICES MATCH FILTER</div>';
+    return;
+  }
+  document.getElementById("apps-grid").innerHTML = filtered.map((s, i) => {
+    const badges = [
+      s.tier ? '<span class="badge tier-' + s.tier + '">' + s.tier.toUpperCase() + '</span>' : "",
+      s.category ? '<span class="badge cat">' + s.category.toUpperCase() + '</span>' : "",
+    ].filter(Boolean).join("");
+    const pods = (s.pods_ready != null && s.pods_total != null)
+      ? '<div class="metric"><div class="metric-label">PODS</div><div class="metric-value ' + (s.pods_ready < s.pods_total ? 'warn' : '') + '">' + s.pods_ready + '/' + s.pods_total + '</div></div>'
+      : "";
+    const restarts = s.restarts != null && s.restarts > 0
+      ? '<div class="metric"><div class="metric-label">RESTARTS</div><div class="metric-value ' + (s.restarts > 5 ? 'crit' : 'warn') + '">' + s.restarts + '</div></div>'
+      : "";
+    const reason = (s.status === "down" || s.status === "degraded") && s.reason
+      ? '<div class="app-reason ' + (s.status === "degraded" ? "degraded" : "") + '">' + s.reason + '</div>'
+      : "";
+    const docsLink = s.docs ? '<a class="app-docs" href="' + s.docs + '" target="_blank" rel="noopener">DOCS</a>' : "";
+    return '<div class="app-card" data-status="' + s.status + '" style="animation-delay:' + (i * 0.06) + 's">' +
+      '<div class="app-card-inner">' +
+      '<div class="app-header"><div class="app-status ' + s.status + '"></div><span class="app-name">' + s.name + '</span></div>' +
+      (badges ? '<div class="app-badges">' + badges + '</div>' : "") +
+      (s.description ? '<p class="app-description">' + s.description + '</p>' : "") +
+      '<div class="app-metrics"><div class="metric"><div class="metric-label">PING</div><div class="metric-value">' + fmtPing(s.ping) + '</div></div>' + pods + restarts + '</div>' +
+      reason +
+      '<div class="app-footer"><span class="app-url">' + s.url.replace("https://", "") + '</span>' +
+      '<div class="app-actions">' + docsLink + '<a class="app-launch" href="' + s.url + '" target="_blank" rel="noopener">LAUNCH →</a></div></div>' +
+      '</div></div>';
+  }).join("");
+}
+
+function renderSummary(services) {
+  const up   = services.filter(s => s.status === "up").length;
+  const deg  = services.filter(s => s.status === "degraded").length;
+  const down = services.filter(s => s.status === "down").length;
+  document.getElementById("status-summary").innerHTML =
+    '<span class="up">' + up + ' UP</span>' +
+    (deg > 0 ? ' <span class="deg">' + deg + ' DEG</span>' : "") +
+    (down > 0 ? ' <span class="down">' + down + ' DOWN</span>' : "");
+}
 
 async function refresh() {
   try {
-    const r = await fetch("https://api.th3borg.org/v1/services/apps", {
-      headers: { "Authorization": "Bearer " + API_KEY }
-    });
-    const data = await r.json();
-    const services = data.services || [];
-
-    const up = services.filter(s => s.status === "up").length;
-    document.getElementById("status-count").textContent = up + "/" + services.length + " ONLINE";
-
-    if (!services.length) {
-      document.getElementById("apps-grid").innerHTML =
-        '<div class="loading-state">NO SERVICES AVAILABLE</div>';
-      return;
+    const [svcRes, clusterRes] = await Promise.all([
+      fetch("https://api.th3borg.org/v1/services/apps", { headers: { "Authorization": "Bearer " + API_KEY } }),
+      fetch("https://api.th3borg.org/v1/cluster/nodes", { headers: { "Authorization": "Bearer " + API_KEY } }),
+    ]);
+    if (svcRes.ok) {
+      const data = await svcRes.json();
+      allServices = data.services || [];
+      renderSummary(allServices);
+      renderServices(allServices);
+      document.getElementById("filter-bar").style.display = "flex";
     }
-
-    document.getElementById("apps-grid").innerHTML = services.map((s, i) => `
-      <div class="app-card" style="animation-delay:${i * 0.08}s">
-        <div class="app-card-inner">
-          <div class="app-header">
-            <div class="app-status ${s.status}"></div>
-            <span class="app-name">${s.name}</span>
-          </div>
-          ${s.description ? `<p class="app-description">${s.description}</p>` : ""}
-          <div class="app-footer">
-            <span class="app-url">${s.url.replace("https://", "")}</span>
-            <a class="app-launch" href="${s.url}" target="_blank" rel="noopener">LAUNCH →</a>
-          </div>
-        </div>
-      </div>`).join("");
-
-    document.getElementById("last-refresh").textContent =
-      "UPDATED " + new Date().toLocaleTimeString("en-GB", { hour12: false });
-
+    if (clusterRes.ok) {
+      const data = await clusterRes.json();
+      renderCluster(data.cluster);
+    }
+    document.getElementById("last-refresh").textContent = "UPDATED " + new Date().toLocaleTimeString("en-GB", { hour12: false });
   } catch(e) {
-    document.getElementById("apps-grid").innerHTML =
-      '<div class="loading-state">UNABLE TO REACH SERVICE API</div>';
+    document.getElementById("apps-grid").innerHTML = '<div class="loading-state">UNABLE TO REACH BORGN3T</div>';
   }
 }
+
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".filter-btn");
+  if (!btn) return;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  activeFilter = btn.dataset.filter;
+  renderServices(allServices);
+});
 
 refresh();
 setInterval(refresh, 30000);
