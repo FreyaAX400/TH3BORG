@@ -4,6 +4,9 @@ metadata:
   name: invidious
   namespace: invidious
   annotations:
+    th3borg.org/apps-healthcheck: "/api/v1/stats"
+    th3borg.org/apps-category: "media"
+    th3borg.org/apps-tier: "optional"
     kubernetes.io/ingress.class: nginx
     th3borg.org/apps-portal: "true"
     th3borg.org/apps-name: "Invidious"

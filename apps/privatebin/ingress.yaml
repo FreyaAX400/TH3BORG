@@ -4,6 +4,9 @@ metadata:
   name: privatebin
   namespace: privatebin
   annotations:
+    th3borg.org/apps-healthcheck: "/"
+    th3borg.org/apps-category: "tools"
+    th3borg.org/apps-tier: "optional"
     kubernetes.io/ingress.class: nginx
     th3borg.org/apps-portal: "true"
     th3borg.org/apps-name: "PrivateBin"

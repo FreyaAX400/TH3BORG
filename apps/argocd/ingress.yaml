@@ -4,6 +4,9 @@ metadata:
   name: argocd-ingress
   namespace: argocd
   annotations:
+    th3borg.org/apps-healthcheck: "/healthz"
+    th3borg.org/apps-category: "infra"
+    th3borg.org/apps-tier: "core"
 spec:
   ingressClassName: nginx
   rules:

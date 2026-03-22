@@ -4,6 +4,9 @@ metadata:
   name: searxng
   namespace: searxng
   annotations:
+    th3borg.org/apps-healthcheck: "/healthz"
+    th3borg.org/apps-category: "tools"
+    th3borg.org/apps-tier: "core"
     kubernetes.io/ingress.class: nginx
     th3borg.org/apps-portal: "true"
     th3borg.org/apps-name: "SearXNG"

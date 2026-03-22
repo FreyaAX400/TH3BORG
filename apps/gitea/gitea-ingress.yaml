@@ -4,6 +4,9 @@ metadata:
   name: gitea-ingress
   namespace: gitea
   annotations:
+    th3borg.org/apps-healthcheck: "/-/health"
+    th3borg.org/apps-category: "dev"
+    th3borg.org/apps-tier: "core"
     nginx.org/client-max-body-size: "512m"
     nginx.org/proxy-request-buffering: "off"
     nginx.org/location-snippets: |

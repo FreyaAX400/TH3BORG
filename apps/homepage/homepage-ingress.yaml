@@ -4,6 +4,9 @@ metadata:
   name: homepage-ingress
   namespace: homepage
   annotations:
+    th3borg.org/apps-healthcheck: "/"
+    th3borg.org/apps-category: "infra"
+    th3borg.org/apps-tier: "core"
     nginx.org/location-snippets: |
       auth_request /authelia;
       auth_request_set $target_url https://$http_host$request_uri;

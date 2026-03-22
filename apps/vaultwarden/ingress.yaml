@@ -4,6 +4,9 @@ metadata:
   name: vaultwarden
   namespace: vaultwarden
   annotations:
+    th3borg.org/apps-healthcheck: "/api/config"
+    th3borg.org/apps-category: "infra"
+    th3borg.org/apps-tier: "core"
     nginx.org/client-max-body-size: "128m"
     th3borg.org/apps-portal: "true"
     th3borg.org/apps-name: "Vaultwarden"

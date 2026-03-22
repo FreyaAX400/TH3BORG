@@ -4,6 +4,9 @@ metadata:
   name: librechat
   namespace: librechat
   annotations:
+    th3borg.org/apps-healthcheck: "/"
+    th3borg.org/apps-category: "ai"
+    th3borg.org/apps-tier: "core"
     th3borg.org/apps-portal: "true"
     th3borg.org/apps-name: "BORG"
     th3borg.org/apps-description: "BORG AI — Qwen3 8B"

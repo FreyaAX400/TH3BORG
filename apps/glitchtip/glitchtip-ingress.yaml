@@ -4,6 +4,9 @@ metadata:
   name: glitchtip-ingress
   namespace: glitchtip
   annotations:
+    th3borg.org/apps-healthcheck: "/api/0/"
+    th3borg.org/apps-category: "infra"
+    th3borg.org/apps-tier: "core"
     nginx.org/client-max-body-size: "50m"
 spec:
   ingressClassName: nginx

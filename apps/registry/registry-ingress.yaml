@@ -4,6 +4,9 @@ metadata:
   name: registry-ingress
   namespace: registry
   annotations:
+    th3borg.org/apps-healthcheck: "/v2/"
+    th3borg.org/apps-category: "infra"
+    th3borg.org/apps-tier: "core"
     nginx.org/client-max-body-size: "0"
     nginx.org/proxy-buffering: "False"
     nginx.org/proxy-connect-timeout: "600"

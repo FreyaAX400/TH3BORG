@@ -2,6 +2,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
+    th3borg.org/apps-healthcheck: "/api/health"
+    th3borg.org/apps-category: "media"
+    th3borg.org/apps-tier: "optional"
     th3borg.org/apps-portal: "true"
     th3borg.org/apps-name: "Kavita"
     th3borg.org/apps-description: "Kavita is a personal library with a pre-curated selection of books. Contact FreyaAX400 if you would like to request additions."

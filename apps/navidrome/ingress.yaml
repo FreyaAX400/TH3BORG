@@ -4,6 +4,9 @@ metadata:
   name: navidrome
   namespace: navidrome
   annotations:
+    th3borg.org/apps-healthcheck: "/ping"
+    th3borg.org/apps-category: "media"
+    th3borg.org/apps-tier: "optional"
     th3borg.org/apps-portal: "true"
     th3borg.org/apps-name: "Navidrome"
     th3borg.org/apps-description: "Music streaming server"

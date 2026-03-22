@@ -4,6 +4,9 @@ metadata:
   name: authelia-ingress
   namespace: authelia
   annotations:
+    th3borg.org/apps-healthcheck: "/healthz/live"
+    th3borg.org/apps-category: "infra"
+    th3borg.org/apps-tier: "core"
     nginx.org/proxy-read-timeout: "360"
     nginx.org/proxy-send-timeout: "360"
     nginx.org/location-snippets: |
