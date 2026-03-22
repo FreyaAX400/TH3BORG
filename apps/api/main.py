@@ -95,7 +95,7 @@ KNOWN_HEALTH_PATHS = {
     "vaultwarden.th3borg.org":  "/api/config",
     "bookstack.th3borg.org":    "/status",
     "uptime.th3borg.org":       "/status",
-    "borg.th3borg.org":         "/api/health",
+    "borg.th3borg.org":         "/",
     "search.th3borg.org":       "/healthz",
     "paste.th3borg.org":        "/",
     "speedtest.th3borg.org":    "/api/healthcheck",
