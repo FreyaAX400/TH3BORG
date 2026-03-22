@@ -45,6 +45,8 @@ librechat:
 credentialsSecretName: "librechat-credentials-env"
 mongodb:
   enabled: true
+  image:
+    tag: "7.0"
   auth:
     enabled: true
     existingSecret: "librechat-mongodb-secret"
