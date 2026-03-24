@@ -603,7 +603,7 @@ class MoEQueryRequest(BaseModel):
     query: str
     expert: Optional[str] = None   # force a specific expert; omit for auto-routing
     top_k: Optional[int] = 5
-    model: Optional[str] = None    # override LLM (e.g. "llama3.2:3b"); omit = auto
+    model: Optional[str] = None    # override LLM (e.g. "qwen3:8b"); omit = auto
 
 async def qdrant_search(collection: str, query_vector: list[float], top_k: int = 5) -> list[dict]:
     """Cosine search a Qdrant collection. Returns payload list."""
@@ -677,7 +677,7 @@ async def route_to_expert(query: str) -> str:
         async with httpx.AsyncClient() as client:
             r = await client.post(
                 f"{OLLAMA_URL}/api/generate",
-                json={"model": "llama3.2:3b", "prompt": prompt, "stream": False},
+                json={"model": "qwen3:8b", "prompt": prompt, "stream": False},
                 timeout=15.0,
             )
             if r.status_code == 200:
@@ -698,7 +698,7 @@ async def llm_generate(system: str, context_chunks: list[str], query: str, model
         context_block = "\n\n<context>\n" + "\n---\n".join(context_chunks) + "\n</context>"
 
     full_prompt = f"{context_block}\n\nUser: {query}" if context_block else query
-    ollama_model = model or "llama3.2:3b"
+    ollama_model = model or "qwen3:8b"
 
     # Try Ollama
     try:
