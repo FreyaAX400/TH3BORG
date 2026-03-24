@@ -1,10 +1,13 @@
 import asyncio
 import httpx
+import json
 import os
 import time
 from fastapi import FastAPI, HTTPException, Security, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel
+from typing import Optional
 
 app = FastAPI(title="BORGN3T", version="2.0.0", docs_url=None, redoc_url=None)
 
@@ -59,6 +62,55 @@ OLLAMA_URL      = os.getenv("OLLAMA_URL", "http://100.106.53.62:11434")
 K8S_HOST      = "https://kubernetes.default.svc"
 SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 SA_CA_PATH    = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+
+QDRANT_URL      = os.getenv("QDRANT_URL",  "http://qdrant.qdrant.svc.cluster.local:6333")
+QDRANT_KEY      = os.getenv("QDRANT_API_KEY", "")
+ANTHROPIC_KEY   = os.getenv("ANTHROPIC_API_KEY", "")
+
+# Maps expert slug → Qdrant collection + system prompt + preferred upstream
+MOE_EXPERTS = {
+    "homelab-ops": {
+        "collection": "homelab-ops",
+        "description": "TH3BORG cluster ops, k3s, ArgoCD, Cloudflare, VORONjord",
+        "system": (
+            "You are the homelab-ops expert for TH3BORG. "
+            "Answer concisely and technically. Prefer shell commands over prose. "
+            "ArgoCD is source of truth — always push to git before kubectl. "
+            "Cluster: BORGling-1 (192.168.4.21 / 100.124.41.14, control-plane), "
+            "BORGling-2 (192.168.7.111 / 100.109.122.50, worker). "
+            "Repo: https://github.com/FreyaAX400/TH3BORG.git"
+        ),
+    },
+    "df-chronicles": {
+        "collection": "df-chronicles",
+        "description": "Dwarf Fortress — Chronicles of the Past Realm, Minkot, Sanctum, Chronicler lineage",
+        "system": (
+            "You are the chronicles-lore expert for the Chronicles of the Past Realm. "
+            "Maintain strict lore consistency. Literary tone, not cinematic. "
+            "Treat in-world history as permanent and canonical. "
+            "Key facts: Slayer=Minkot (gold mace, steel armor), Sanctum ~Z:25, "
+            "tomb-first rule, hereditary Chronicler lineage."
+        ),
+    },
+    "academic": {
+        "collection": "academic",
+        "description": "Math, geometry, probability/stats, essay writing, coursework",
+        "system": (
+            "You are the academic expert. Show all reasoning steps. "
+            "Use correct mathematical notation. Never skip steps."
+        ),
+    },
+    "craft": {
+        "collection": "craft",
+        "description": "Blacksmithing, woodworking, bookbinding, leatherwork",
+        "system": (
+            "You are the forge-craft expert. Be material-first and safety-aware. "
+            "Traditional methods preferred. No power tool substitutions unless asked. "
+            "Key project: Fornelskr warhammer — 1060 carbon steel, Angerthas Moria cirth inlay, "
+            "naval brass langets, 20\" ash handle."
+        ),
+    },
+}
 
 SKIP_NAMESPACES = {"kube-system", "nginx-ingress", "registry", "homepage", "api"}
 
@@ -544,6 +596,208 @@ async def registry(_: str = Depends(require_scope("full"))):
         "categories": list(set(s["category"] for s in svcs if s["category"])),
         "tiers": list(set(s["tier"] for s in svcs if s["tier"])),
     }
+
+# ─── MoE ─────────────────────────────────────────────────────────────────────
+
+class MoEQueryRequest(BaseModel):
+    query: str
+    expert: Optional[str] = None   # force a specific expert; omit for auto-routing
+    top_k: Optional[int] = 5
+    model: Optional[str] = None    # override LLM (e.g. "llama3.2:3b"); omit = auto
+
+async def qdrant_search(collection: str, query_vector: list[float], top_k: int = 5) -> list[dict]:
+    """Cosine search a Qdrant collection. Returns payload list."""
+    headers = {"Content-Type": "application/json"}
+    if QDRANT_KEY:
+        headers["api-key"] = QDRANT_KEY
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                f"{QDRANT_URL}/collections/{collection}/points/search",
+                headers=headers,
+                json={"vector": query_vector, "limit": top_k, "with_payload": True},
+                timeout=5.0,
+            )
+            if r.status_code == 200:
+                return [hit["payload"] for hit in r.json().get("result", [])]
+    except Exception as e:
+        print(f"qdrant_search error ({collection}): {e}")
+    return []
+
+async def qdrant_collection_info(collection: str) -> dict:
+    headers = {}
+    if QDRANT_KEY:
+        headers["api-key"] = QDRANT_KEY
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.get(
+                f"{QDRANT_URL}/collections/{collection}",
+                headers=headers,
+                timeout=5.0,
+            )
+            if r.status_code == 200:
+                info = r.json().get("result", {})
+                return {
+                    "points_count": info.get("points_count", 0),
+                    "status": info.get("status", "unknown"),
+                }
+    except Exception as e:
+        print(f"qdrant_info error ({collection}): {e}")
+    return {"points_count": 0, "status": "unreachable"}
+
+async def embed_query(query: str) -> list[float]:
+    """Embed via Ollama (nomic-embed-text). Returns empty list on failure."""
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                f"{OLLAMA_URL}/api/embeddings",
+                json={"model": "nomic-embed-text", "prompt": query},
+                timeout=10.0,
+            )
+            if r.status_code == 200:
+                return r.json().get("embedding", [])
+    except Exception as e:
+        print(f"embed error: {e}")
+    return []
+
+async def route_to_expert(query: str) -> str:
+    """
+    Classify query → expert slug via Ollama.
+    Falls back to 'homelab-ops' on failure.
+    """
+    slugs = list(MOE_EXPERTS.keys())
+    descriptions = "\n".join(f"- {k}: {v['description']}" for k, v in MOE_EXPERTS.items())
+    prompt = (
+        f"Classify the following query into exactly one of these expert domains.\n"
+        f"Respond with ONLY the slug, nothing else.\n\n"
+        f"Domains:\n{descriptions}\n\n"
+        f"Query: {query}\n\nSlug:"
+    )
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={"model": "llama3.2:3b", "prompt": prompt, "stream": False},
+                timeout=15.0,
+            )
+            if r.status_code == 200:
+                slug = r.json().get("response", "").strip().lower().split()[0]
+                if slug in MOE_EXPERTS:
+                    return slug
+    except Exception as e:
+        print(f"router classify error: {e}")
+    return "homelab-ops"
+
+async def llm_generate(system: str, context_chunks: list[str], query: str, model: Optional[str]) -> dict:
+    """
+    Generate a response. Tries Ollama first; falls back to Anthropic API if ANTHROPIC_KEY set.
+    Returns {"text": ..., "source": "ollama"|"anthropic"|"error"}.
+    """
+    context_block = ""
+    if context_chunks:
+        context_block = "\n\n<context>\n" + "\n---\n".join(context_chunks) + "\n</context>"
+
+    full_prompt = f"{context_block}\n\nUser: {query}" if context_block else query
+    ollama_model = model or "llama3.2:3b"
+
+    # Try Ollama
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": ollama_model,
+                    "system": system,
+                    "prompt": full_prompt,
+                    "stream": False,
+                },
+                timeout=60.0,
+            )
+            if r.status_code == 200:
+                return {"text": r.json().get("response", "").strip(), "source": "ollama", "model": ollama_model}
+    except Exception as e:
+        print(f"ollama generate error: {e}")
+
+    # Fallback: Anthropic API
+    if ANTHROPIC_KEY:
+        try:
+            async with httpx.AsyncClient() as client:
+                r = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": ANTHROPIC_KEY,
+                        "anthropic-version": "2023-06-01",
+                        "content-type": "application/json",
+                    },
+                    json={
+                        "model": "claude-sonnet-4-20250514",
+                        "max_tokens": 1024,
+                        "system": system,
+                        "messages": [{"role": "user", "content": full_prompt}],
+                    },
+                    timeout=30.0,
+                )
+                if r.status_code == 200:
+                    text = r.json()["content"][0]["text"]
+                    return {"text": text, "source": "anthropic", "model": "claude-sonnet-4-20250514"}
+        except Exception as e:
+            print(f"anthropic fallback error: {e}")
+
+    return {"text": "All LLM upstreams unavailable.", "source": "error", "model": None}
+
+
+@app.post("/v1/moe/query")
+async def moe_query(body: MoEQueryRequest, _: str = Depends(require_scope("full"))):
+    start = time.monotonic()
+
+    # 1. Route
+    expert_slug = body.expert if body.expert in MOE_EXPERTS else await route_to_expert(body.query)
+    expert = MOE_EXPERTS[expert_slug]
+
+    # 2. Embed + retrieve context
+    vector = await embed_query(body.query)
+    chunks: list[str] = []
+    if vector:
+        hits = await qdrant_search(expert["collection"], vector, top_k=body.top_k or 5)
+        chunks = [h.get("text", "") for h in hits if h.get("text")]
+
+    # 3. Generate
+    result = await llm_generate(expert["system"], chunks, body.query, body.model)
+
+    return {
+        "expert": expert_slug,
+        "query": body.query,
+        "response": result["text"],
+        "source": result["source"],
+        "model": result["model"],
+        "context_chunks": len(chunks),
+        "latency_ms": int((time.monotonic() - start) * 1000),
+    }
+
+
+@app.get("/v1/moe/experts")
+async def moe_experts(_: str = Depends(require_scope("full"))):
+    return {
+        "experts": [
+            {"slug": k, "description": v["description"], "collection": v["collection"]}
+            for k, v in MOE_EXPERTS.items()
+        ]
+    }
+
+
+@app.get("/v1/moe/collections")
+async def moe_collections(_: str = Depends(require_scope("full"))):
+    results = await asyncio.gather(
+        *[qdrant_collection_info(v["collection"]) for v in MOE_EXPERTS.values()]
+    )
+    return {
+        "collections": [
+            {"slug": slug, "collection": expert["collection"], **info}
+            for (slug, expert), info in zip(MOE_EXPERTS.items(), results)
+        ],
+        "qdrant_url": QDRANT_URL,
+    }
+
 
 @app.get("/v1/annotations")
 async def annotations(_: str = Depends(require_scope("full"))):
