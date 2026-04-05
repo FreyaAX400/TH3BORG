@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: gitea.th3borg.org
+    - host: forgejo.th3borg.org
       http:
         paths:
           - path: /
